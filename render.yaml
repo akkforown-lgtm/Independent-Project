@@ -5,7 +5,7 @@ services:
     region: oregon
     branch: main
     root: Client/server
-    buildCommand: npm install
+    buildCommand: cd ../.. && npm install --prefix shared && cd Client/server && npm install
     startCommand: npm start
 
   - type: web_service
@@ -14,5 +14,5 @@ services:
     region: oregon
     branch: main
     root: admin/server
-    buildCommand: npm install
+    buildCommand: cd ../.. && npm install --prefix shared && cd admin/server && npm install
     startCommand: npm start

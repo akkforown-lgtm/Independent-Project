@@ -58,9 +58,11 @@
 - **Environment**: `Node`
 - **Region**: `Oregon` (или ближайший)
 - **Branch**: `main`
-- **Build Command**: `npm install`
+- **Build Command**: `cd ../.. && npm install --prefix shared && cd Client/server && npm install`
 - **Start Command**: `npm start`
 - **Root Directory**: `Client/server`
+
+> Важно: проект использует общую папку `shared`, поэтому при сборке нужно сначала установить зависимости в `shared`.
 
 ### Шаг 3: Добавление переменных окружения
 
@@ -84,6 +86,8 @@ CORS_ORIGIN = https://luxury-haven-client.onrender.com,https://luxury-haven-admi
 Повторите шаги 1-4 для админского сервиса:
 
 - **Name**: `luxury-haven-admin`
+- **Build Command**: `cd ../.. && npm install --prefix shared && cd admin/server && npm install`
+- **Start Command**: `npm start`
 - **Root Directory**: `admin/server`
 
 Переменные окружения:

@@ -14,20 +14,22 @@ async function loadRooms() {
 
     const getRoomImage = (room) => room.imageUrl || room.image || '';
     const renderRoomCard = (room) => `
-      <div class="bg-zinc-900 rounded-2xl overflow-hidden border border-white/5 stat-card">
-        <div class="h-48 bg-zinc-800 flex items-center justify-center text-4xl">
+      <div class="bg-zinc-900 rounded-2xl overflow-hidden border border-white/5 stat-card flex flex-col">
+        <div class="aspect-[3/2] bg-zinc-800 overflow-hidden">
           <img src="${getRoomImage(room)}" class="w-full h-full object-cover" onerror="this.parentElement.textContent='🏨'">
         </div>
-        <div class="p-5">
-          <div class="flex justify-between items-start mb-2">
-            <h3 class="text-lg font-semibold">${room.name}</h3>
+        <div class="p-5 flex-1 flex flex-col">
+          <div class="flex justify-between items-start mb-2 gap-3">
+            <h3 class="text-lg font-semibold truncate">${room.name}</h3>
             <span class="px-2 py-0.5 text-xs rounded-full ${room.category === 'vip' ? 'bg-amber-500/20 text-amber-400' : room.category === 'classic' ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-500/20 text-gray-400'}">${tr(`category.${room.category}`)}</span>
           </div>
-          <p class="text-amber-400 text-xl font-bold">$${room.price}<span class="text-sm text-gray-400">${tr('perNight')}</span></p>
-          <p class="text-sm text-gray-400 mt-1">${room.size || ''}</p>
-          <div class="flex gap-2 mt-4">
-            <button onclick="openRoomForm('${room._id}')" class="flex-1 py-2 border border-amber-400/50 text-amber-400 rounded-xl hover:bg-amber-400/10 transition text-sm">✏️ ${tr('edit')}</button>
-            <button onclick="deleteRoom('${room._id}')" class="flex-1 py-2 border border-red-400/30 text-red-400 rounded-xl hover:bg-red-400/10 transition text-sm">🗑️ ${tr('delete')}</button>
+          <div class="mt-auto">
+            <p class="text-amber-400 text-xl font-bold">$${room.price} <span class="text-sm text-gray-400">${tr('perNight')}</span></p>
+            <p class="text-sm text-gray-400 mt-1">${room.size || ''}</p>
+            <div class="flex flex-col sm:flex-row gap-2 mt-4">
+              <button onclick="openRoomForm('${room._id}')" class="w-full sm:flex-1 py-2 border border-amber-400/50 text-amber-400 rounded-xl hover:bg-amber-400/10 transition text-sm">✏️ ${tr('edit')}</button>
+              <button onclick="deleteRoom('${room._id}')" class="w-full sm:flex-1 py-2 border border-red-400/30 text-red-400 rounded-xl hover:bg-red-400/10 transition text-sm">🗑️ ${tr('delete')}</button>
+            </div>
           </div>
         </div>
       </div>`;
@@ -55,21 +57,21 @@ async function loadRooms() {
         ${regionSection}
         <div class="mb-10">
           <h3 class="text-2xl font-semibold mb-4 text-amber-400">${tr('vipRoomsTitle', {count: vipRooms.length})}</h3>
-          <div class="grid grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             ${vipRooms.map(renderRoomCard).join('') || `<p class="text-gray-500">${tr('noRooms')}</p>`}
           </div>
         </div>
 
         <div class="mb-10">
           <h3 class="text-2xl font-semibold mb-4 text-blue-400">${tr('classicRoomsTitle', {count: classicRooms.length})}</h3>
-          <div class="grid grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             ${classicRooms.map(renderRoomCard).join('') || `<p class="text-gray-500">${tr('noRooms')}</p>`}
           </div>
         </div>
 
         <div class="mb-10">
           <h3 class="text-2xl font-semibold mb-4 text-gray-400">${tr('economyRoomsTitle', {count: cheapRooms.length})}</h3>
-          <div class="grid grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             ${cheapRooms.map(renderRoomCard).join('') || `<p class="text-gray-500">${tr('noRooms')}</p>`}
           </div>
         </div>

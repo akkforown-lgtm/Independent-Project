@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-translate="login.pageTitle">Вход • Luxury Haven</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    .shake { animation: shake 0.6s ease-in-out; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+    }
+    .login-card { animation: slideUp 0.8s ease forwards; }
+    .input-error { border-color: #ef4444 !important; }
+    .btn-loading { animation: pulse 1.5s infinite; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full px-8 py-12 bg-zinc-900/70 backdrop-blur-xl rounded-3xl border border-white/10 login-card">
+    <h1 class="text-4xl font-bold text-center title-font mb-2" data-translate="login.title">Вход в кабинет</h1>
+    <p class="text-center text-gray-400 mb-8" data-translate="login.subtitle">Добро пожаловать обратно</p>
+
+    <form class="space-y-6" onsubmit="handleLogin(event)">
+      <div>
+        <label class="block text-sm mb-2" data-translate="login.email">Email</label>
+        <input type="email" id="login-email" required 
+               class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition"
+               placeholder="your@email.com" data-translate-placeholder="login.emailPlaceholder">
+        <p id="email-error" class="text-red-400 text-xs mt-1 hidden"></p>
+      </div>
+      <div>
+        <label class="block text-sm mb-2" data-translate="login.password">Пароль</label>
+        <input type="password" id="login-password" required 
+               class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition"
+               placeholder="••••••" data-translate-placeholder="login.passwordPlaceholder">
+        <p id="password-error" class="text-red-400 text-xs mt-1 hidden"></p>
+      </div>
+      <button type="submit" id="login-btn"
+              class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition transform hover:scale-[1.02] active:scale-[0.98]">
+        <span data-translate="login.button">Войти</span>
+      </button>
+    </form>
+
+    <p class="text-center mt-6 text-sm">
+      <span data-translate="login.noaccount">Нет аккаунта?</span> 
+      <a href="register.html" class="text-amber-400 hover:underline transition" data-translate="login.register">Зарегистрироваться</a>
+    </p>
+  </div>
+
+  <div id="alert-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[200]" onclick="if(event.target===this)closeAlertModal()">
+    <div class="bg-zinc-900 rounded-3xl max-w-md w-full mx-4 p-8 text-center" style="animation: slideUp 0.3s ease forwards;">
+      <div class="text-6xl mb-4" id="alert-icon">⚠️</div>
+      <h3 class="text-2xl font-semibold mb-3" id="alert-title" data-translate="alert.warning.title">Внимание</h3>
+      <p class="text-gray-400 mb-6" id="alert-message" data-translate="alert.message.placeholder">Сообщение</p>
+      <button onclick="closeAlertModal()" 
+              class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition transform hover:scale-[1.02] active:scale-[0.98]" 
+              data-translate="alert.close">Закрыть</button>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/helpers.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-translate="dashboard.pageTitle">Личный кабинет • Luxury Haven</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 5px rgba(251, 191, 36, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.6); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes pageExit {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.95); }
+    }
+    
+    .animate-fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+    .animate-fade-in-up:nth-child(2) { animation-delay: 0.15s; }
+    .animate-fade-in-down { animation: fadeInDown 0.5s ease forwards; }
+    .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
+    .animate-scale-in { animation: scaleIn 0.3s ease forwards; }
+    
+    .page-exit {
+      animation: pageExit 0.5s ease forwards;
+    }
+    
+    .booking-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid transparent;
+    }
+    .booking-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.05), transparent);
+      transition: left 0.5s ease;
+      z-index: 0;
+    }
+    .booking-card:hover::before { left: 100%; }
+    .booking-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      border-color: rgba(251, 191, 36, 0.2);
+    }
+    .booking-card > * { position: relative; z-index: 1; }
+    
+    .modal-overlay { backdrop-filter: blur(8px); }
+    
+    .room-select-option {
+      transition: all 0.25s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .room-select-option::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at center, rgba(251, 191, 36, 0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .room-select-option:hover { 
+      transform: scale(1.03); 
+      border-color: #f59e0b; 
+    }
+    .room-select-option:hover::after { opacity: 0.5; }
+    .room-select-option.selected {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.15);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+      transform: scale(1.03);
+    }
+    .room-select-option.selected::after { opacity: 1; }
+    
+    .btn-hover-effect {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-hover-effect:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    .btn-hover-effect:active {
+      transform: translateY(0);
+    }
+    
+    .profile-avatar:hover {
+      transform: rotate(5deg) scale(1.05);
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(251, 191, 36, 0.3);
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(251, 191, 36, 0.5);
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white">
+  <div class="max-w-7xl mx-auto px-8 py-10">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-10 animate-fade-in-down">
+      <div>
+        <h1 class="text-4xl font-bold title-font" data-translate="dashboard.title">Личный кабинет</h1>
+        <p class="text-gray-400 mt-2" id="welcome-message">Добро пожаловать!</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="flex border border-white/30 rounded-full overflow-hidden text-sm font-medium">
+          <button onclick="switchLanguage('ru')" id="btn-ru" class="px-5 py-2 transition hover:bg-amber-500/20">RU</button>
+          <button onclick="switchLanguage('en')" id="btn-en" class="px-5 py-2 transition hover:bg-amber-500/20">EN</button>
+        </div>
+        <button onclick="logout()" class="px-6 py-2.5 border border-red-400/30 text-red-400 rounded-full hover:bg-red-400/10 transition transform hover:scale-105">
+          <span data-translate="dashboard.logout">Выйти</span>
+        </button>
+        <button onclick="goToHomeWithAnimation()" class="px-6 py-2.5 border border-white/30 rounded-full hover:bg-white/10 transition transform hover:scale-105" data-translate="dashboard.back">
+          На главную
+        </button>
+      </div>
+    </div>
+
+    <!-- Content (динамически загружается) -->
+    <div id="dashboard-content" class="grid grid-cols-12 gap-8">
+      <div class="col-span-12 text-center py-20">
+        <div class="text-6xl mb-4 animate-bounce">🔄</div>
+        <p class="text-xl text-gray-400" data-translate="dashboard.loading">Загрузка...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Modal -->
+  <div id="change-modal" class="hidden fixed inset-0 bg-black/80 modal-overlay flex items-center justify-center z-[200]" onclick="if(event.target===this)closeChangeModal()">
+    <div class="bg-zinc-900 rounded-3xl max-w-lg w-full mx-4 p-8 animate-scale-in max-h-[90vh] overflow-y-auto">
+      <h3 class="text-2xl font-semibold mb-6" data-translate="dashboard.changeBooking">Изменить бронирование</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm mb-2" data-translate="booking.city">Город / Филиал</label>
+          <select id="change-city" class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:border-amber-400 transition">
+            <option value="Tashkent">Tashkent</option>
+            <option value="Bukhara">Bukhara</option>
+            <option value="Samarkand">Samarkand</option>
+            <option value="Khiva">Khiva</option>
+            <option value="Fergana">Fergana</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm mb-3 font-medium text-gray-300" data-translate="dashboard.changeRoom">Выбранный номер</label>
+          <div class="flex items-center gap-4 p-4 bg-zinc-800 border border-white/20 rounded-2xl">
+            <div id="selected-room-display" class="flex-1">
+              <p class="font-bold text-amber-400" id="current-room-name-display">—</p>
+              <p class="text-xs text-gray-500" id="current-room-price-display">$0/night</p>
+            </div>
+            <button onclick="openRoomsModalForChange()" class="px-4 py-2 bg-amber-500 text-black text-xs font-bold rounded-xl hover:bg-amber-600 transition" data-translate="dashboard.changeRoomBtn">
+              Select from List
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-sm mb-2" data-translate="booking.checkin">Дата заезда</label><input type="date" id="change-checkin" class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:border-amber-400"></div>
+          <div><label class="block text-sm mb-2" data-translate="booking.checkout">Дата выезда</label><input type="date" id="change-checkout" class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:border-amber-400"></div>
+        </div>
+        <div>
+          <label class="block text-sm mb-2" data-translate="booking.services">Дополнительные услуги</label>
+          <div class="grid grid-cols-2 gap-2 text-sm" id="change-services">
+            <label class="flex items-center gap-2 p-2 bg-zinc-800 border border-white/10 rounded-xl cursor-pointer hover:border-amber-400 transition"><input type="checkbox" value="spa" class="accent-amber-500"> 💆 SPA</label>
+            <label class="flex items-center gap-2 p-2 bg-zinc-800 border border-white/10 rounded-xl cursor-pointer hover:border-amber-400 transition"><input type="checkbox" value="restaurant" class="accent-amber-500"> 🍽️ <span data-translate="dashboard.service.restaurant">Ресторан</span></label>
+            <label class="flex items-center gap-2 p-2 bg-zinc-800 border border-white/10 rounded-xl cursor-pointer hover:border-amber-400 transition"><input type="checkbox" value="bar" class="accent-amber-500"> 🍸 <span data-translate="dashboard.service.bar">Бар</span></label>
+            <label class="flex items-center gap-2 p-2 bg-zinc-800 border border-white/10 rounded-xl cursor-pointer hover:border-amber-400 transition"><input type="checkbox" value="transfer" class="accent-amber-500"> 🚗 <span data-translate="dashboard.service.transfer">Трансфер</span></label>
+            <label class="flex items-center gap-2 p-2 bg-zinc-800 border border-white/10 rounded-xl cursor-pointer hover:border-amber-400 transition"><input type="checkbox" value="laundry" class="accent-amber-500"> 🧺 <span data-translate="dashboard.service.laundry">Прачечная</span></label>
+            <label class="flex items-center gap-2 p-2 bg-zinc-800 border border-white/10 rounded-xl cursor-pointer hover:border-amber-400 transition"><input type="checkbox" value="excursion" class="accent-amber-500"> 🏞️ <span data-translate="dashboard.service.excursion">Экскурсия</span></label>
+          </div>
+        </div>
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
+          <p class="text-sm text-amber-400" id="change-price-preview" data-translate="dashboard.changePricePreview">Новая стоимость будет рассчитана автоматически</p>
+        </div>
+      </div>
+      <div class="flex gap-4 mt-6">
+        <button onclick="closeChangeModal()" class="flex-1 py-4 border border-white/30 rounded-2xl hover:bg-white/5 transition btn-hover-effect" data-translate="booking.cancel">Отмена</button>
+        <button onclick="submitChangeRequest()" class="flex-1 py-4 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition btn-hover-effect" data-translate="dashboard.submitChange">Отправить запрос</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Modal -->
+  <div id="cancel-modal" class="hidden fixed inset-0 bg-black/80 modal-overlay flex items-center justify-center z-[200]" onclick="if(event.target===this)closeCancelModal()">
+    <div class="bg-zinc-900 rounded-3xl max-w-md w-full mx-4 p-8 text-center animate-scale-in max-h-[90vh] overflow-y-auto">
+      <div class="text-6xl mb-4">🗑️</div>
+      <h3 class="text-2xl font-semibold mb-3" data-translate="dashboard.cancelTitle">Отменить бронирование?</h3>
+      <p class="text-gray-400 mb-6" data-translate="dashboard.cancelConfirm">Вы уверены что хотите отменить это бронирование?</p>
+      <div class="flex gap-4">
+        <button onclick="closeCancelModal()" class="flex-1 py-4 border border-white/30 rounded-2xl hover:bg-white/5 transition btn-hover-effect" data-translate="dashboard.no">Нет</button>
+        <button onclick="confirmCancelRequest()" class="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-2xl transition btn-hover-effect" data-translate="dashboard.yesCancel">Да, отменить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modal -->
+  <div id="alert-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[250]" onclick="if(event.target===this)closeAlertModal()">
+    <div class="bg-zinc-900 rounded-3xl max-w-md w-full mx-4 p-8 text-center animate-scale-in max-h-[90vh] overflow-y-auto">
+      <div class="text-6xl mb-4" id="alert-icon">⚠️</div>
+      <h3 class="text-2xl font-semibold mb-3" id="alert-title" data-translate="alert.warning.title">Внимание</h3>
+      <p class="text-gray-400 mb-6" id="alert-message" data-translate="alert.message.placeholder">Сообщение</p>
+      <button onclick="closeAlertModal()" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition btn-hover-effect" data-translate="alert.close">Закрыть</button>
+    </div>
+  </div>
+
+  <!-- Receipt Modal -->
+  <div id="receipt-modal" class="hidden fixed inset-0 bg-black/80 modal-overlay flex items-center justify-center z-[200]">
+    <div class="bg-zinc-900 rounded-3xl max-w-md w-full mx-4 p-8 text-center animate-scale-in max-h-[90vh] overflow-y-auto">
+      <div class="text-5xl mb-4">🧾</div>
+      <h3 class="text-2xl font-semibold mb-4" data-translate="receipt.title">Чек об оплате</h3>
+      <div id="receipt-content" class="text-left space-y-2 text-sm"></div>
+      <button onclick="document.getElementById('receipt-modal').classList.add('hidden')" class="w-full py-3 bg-amber-500 text-black rounded-2xl font-semibold mt-6 btn-hover-effect" data-translate="alert.close">Закрыть</button>
+    </div>
+  </div>
+
+  <!-- Rooms Modal (Added for Change functionality) -->
+  <div id="rooms-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[210] overflow-y-auto" style="animation: fadeIn 0.4s ease forwards;">
+    <div class="modal-content bg-zinc-900 w-full max-w-7xl mx-4 my-8 rounded-3xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl" style="animation: scaleIn 0.5s ease forwards;">
+      <div class="flex justify-between items-center border-b border-white/10 px-8 py-6">
+        <h2 class="text-4xl font-bold title-font text-white" data-translate="rooms.title">Наши номера</h2>
+        <button onclick="closeRoomsModal()" class="text-5xl leading-none text-gray-400 hover:text-white transition transform hover:scale-110 hover:rotate-90 duration-300">×</button>
+      </div>
+      <div class="p-8 overflow-y-auto flex-1 custom-scrollbar">
+        <p class="text-center text-gray-400 mb-12" data-translate="rooms.subtitle">Выберите идеальный вариант для вашего незабываемого отдыха</p>
+        <section class="mb-16"><h3 class="text-3xl font-semibold mb-8 text-white" data-translate="rooms.vip">VIP Номера</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="vip-rooms"></div></section>
+        <section class="mb-16"><h3 class="text-3xl font-semibold mb-8 text-white" data-translate="rooms.classic">Классические номера</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="classic-rooms"></div></section>
+        <section><h3 class="text-3xl font-semibold mb-8 text-white" data-translate="rooms.cheap">Эконом номера</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="cheap-rooms"></div></section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Room Bookings Modal (for info) -->
+  <div id="room-bookings-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[220]" onclick="if(event.target===this)closeRoomBookingsModal()">
+    <div class="bg-zinc-900 rounded-3xl max-w-lg w-full mx-4 p-8 text-left max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-6">
+        <h3 id="room-bookings-title" class="text-2xl font-semibold text-white" data-translate="rooms.bookingModalTitle">Active reservations</h3>
+        <button onclick="closeRoomBookingsModal()" class="text-4xl leading-none text-gray-400 hover:text-white transition">×</button>
+      </div>
+      <div id="room-bookings-content" class="space-y-3 text-sm text-gray-300"></div>
+      <button onclick="closeRoomBookingsModal()" class="w-full py-4 mt-6 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition" data-translate="alert.close">Закрыть</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/helpers.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/modals.js"></script>
+  <script src="js/dashboard.js"></script>
+  
+  <script>
+    // Функция перехода на главную с анимацией
+    function goToHomeWithAnimation() {
+      document.body.classList.add('page-exit');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 450);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+/* ==================== БАЗОВЫЕ СТИЛИ ==================== */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+body { 
+  font-family: 'Inter', sans-serif; 
+}
+
+.title-font { 
+  font-family: 'Playfair Display', serif; 
+}
+
+.section { 
+  scroll-margin-top: 80px; 
+}
+
+/* ==================== КАРТОЧКИ НОМЕРОВ ==================== */
+.room-card {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.room-card:hover {
+  transform: translateY(-15px);
+  box-shadow: 0 30px 60px -15px rgb(0 0 0 / 0.7);
+}
+
+.room-card img {
+  transition: all 0.7s ease;
+}
+
+.room-card:hover img {
+  transform: scale(1.1);
+}
+
+/* ==================== АНИМАЦИИ МОДАЛЬНЫХ ОКОН ==================== */
+#rooms-modal, 
+#booking-modal, 
+#success-modal, 
+#alert-modal {
+  animation: fadeInModal 0.4s ease forwards;
+}
+
+.modal-content {
+  animation: modalPopUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fadeInModal { 
+  from { opacity: 0; } 
+  to { opacity: 1; } 
+}
+
+@keyframes modalPopUp {
+  from { 
+    opacity: 0; 
+    transform: scale(0.75) translateY(80px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1) translateY(0); 
+  }
+}
+
+/* ==================== ПЛАВНАЯ ПРОКРУТКА ==================== */
+html.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* ==================== КАСТОМИЗАЦИЯ СКРОЛЛБАРА ==================== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #18181b; /* zinc-900 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3f3f46; /* zinc-700 */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b; /* zinc-600 */
+}
+
+/* ==================== ФОКУС ДЛЯ INPUT ==================== */
+input:focus, select:focus {
+  outline: none;
+}
+
+/* ==================== ПЕРЕХОДЫ ДЛЯ КНОПОК ==================== */
+.transition {
+  transition: all 0.3s ease;
+}

@@ -1,0 +1,18 @@
+services:
+  - type: web_service
+    name: luxury-haven-client
+    env: node
+    region: oregon
+    branch: main
+    root: Client/server
+    buildCommand: npm install
+    startCommand: npm start
+
+  - type: web_service
+    name: luxury-haven-admin
+    env: node
+    region: oregon
+    branch: main
+    root: admin/server
+    buildCommand: npm install
+    startCommand: npm start

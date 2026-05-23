@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-translate="register.pageTitle">Регистрация • Luxury Haven</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    .shake { animation: shake 0.6s ease-in-out; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .register-card { animation: slideUp 0.8s ease forwards; }
+    .input-error { border-color: #ef4444 !important; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen flex items-center justify-center">
+  <div class="max-w-md w-full px-8 py-12 bg-zinc-900/70 backdrop-blur-xl rounded-3xl border border-white/10 register-card">
+    <h1 class="text-4xl font-bold text-center title-font mb-2" data-translate="register.title">Создать аккаунт</h1>
+    <p class="text-center text-gray-400 mb-8" data-translate="register.subtitle">Присоединяйтесь к Luxury Haven</p>
+
+    <form class="space-y-5" onsubmit="handleRegister(event)">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm mb-2" data-translate="register.firstname">Имя</label>
+          <input type="text" id="reg-firstname" required class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" placeholder="Иван" data-translate-placeholder="register.firstnamePlaceholder">
+        </div>
+        <div>
+          <label class="block text-sm mb-2" data-translate="register.lastname">Фамилия</label>
+          <input type="text" id="reg-lastname" required class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" placeholder="Иванов" data-translate-placeholder="register.lastnamePlaceholder">
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm mb-2" data-translate="register.email">Email</label>
+        <input type="email" id="reg-email" required class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" placeholder="your@email.com" data-translate-placeholder="register.emailPlaceholder">
+        <p id="email-error" class="text-red-400 text-xs mt-1 hidden"></p>
+      </div>
+      <div>
+        <label class="block text-sm mb-2" data-translate="register.phone">Номер телефона</label>
+        <div class="flex">
+          <select id="reg-phone-code" class="px-4 py-3 bg-zinc-800 border border-r-0 border-white/20 rounded-l-2xl focus:outline-none">
+            <option value="+7">+7 (RU / KZ)</option>
+            <option value="+998">+998 (UZ)</option>
+          </select>
+          <input type="tel" id="reg-phone" required placeholder="___ ___ __ __" class="flex-1 px-5 py-3 bg-zinc-800 border border-white/20 rounded-r-2xl focus:outline-none focus:border-amber-400 transition" data-translate-placeholder="register.phonePlaceholder">
+        </div>
+        <p id="phone-error" class="text-red-400 text-xs mt-1 hidden"></p>
+      </div>
+      <div>
+        <label class="block text-sm mb-2" data-translate="register.password">Пароль</label>
+        <input type="password" id="reg-password" required class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" placeholder="Минимум 6 символов" data-translate-placeholder="register.passwordPlaceholder">
+        <p id="password-error" class="text-red-400 text-xs mt-1 hidden"></p>
+      </div>
+      <button type="submit" id="register-btn" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition transform hover:scale-[1.02] active:scale-[0.98]">
+        <span data-translate="register.button">Зарегистрироваться</span>
+      </button>
+    </form>
+
+    <p class="text-center mt-6 text-sm">
+      <span data-translate="register.haveaccount">Уже есть аккаунт?</span> 
+      <a href="login.html" class="text-amber-400 hover:underline transition" data-translate="register.login">Войти</a>
+    </p>
+  </div>
+
+  <div id="alert-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[200]" onclick="if(event.target===this)closeAlertModal()">
+    <div class="bg-zinc-900 rounded-3xl max-w-md w-full mx-4 p-8 text-center">
+      <div class="text-6xl mb-4" id="alert-icon">⚠️</div>
+      <h3 class="text-2xl font-semibold mb-3" id="alert-title" data-translate="alert.warning.title">Внимание</h3>
+      <p class="text-gray-400 mb-6" id="alert-message" data-translate="alert.message.placeholder">Сообщение</p>
+      <button onclick="closeAlertModal()" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition" data-translate="alert.close">Закрыть</button>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/helpers.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

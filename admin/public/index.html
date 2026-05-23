@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-translate="admin.pageTitle">Админ-панель • Luxury Haven</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 10%,30%,50%,70%,90% { transform: translateX(-5px); } 20%,40%,60%,80% { transform: translateX(5px); } }
+    @keyframes langSwitch { 0% { opacity: 0.6; transform: translateY(-8px); } 100% { opacity: 1; transform: translateY(0); } }
+    .login-card { animation: slideUp 0.8s ease forwards; }
+    .shake { animation: shake 0.6s ease-in-out; }
+    .input-error { border-color: #ef4444 !important; }
+    .lang-switching [data-translate] { animation: langSwitch 0.35s ease forwards; }
+    body { font-family: 'Inter', sans-serif; }
+    .title-font { font-family: 'Playfair Display', serif; }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-zinc-950 text-white min-h-screen flex items-center justify-center">
+
+  <div class="max-w-md w-full px-8 py-12 bg-zinc-900/70 backdrop-blur-xl rounded-3xl border border-white/10 login-card">
+    
+    <!-- Выбор языка -->
+    <div class="flex justify-center mb-6">
+      <div class="flex border border-white/30 rounded-full overflow-hidden text-sm font-medium">
+        <button onclick="switchLang('ru')" id="btn-ru" class="px-5 py-2 transition hover:bg-amber-500/20">RU</button>
+        <button onclick="switchLang('en')" id="btn-en" class="px-5 py-2 transition hover:bg-amber-500/20">EN</button>
+      </div>
+    </div>
+
+    <div class="text-center mb-8">
+      <div class="text-5xl mb-4">🔐</div>
+      <h1 class="text-4xl font-bold title-font mb-2">LUXURY HAVEN</h1>
+      <p class="text-amber-400 text-sm font-medium" data-translate="admin.subtitle">Админ-панель</p>
+    </div>
+
+    <!-- Переключатель: Вход / Регистрация -->
+    <div class="flex border border-white/30 rounded-full overflow-hidden mb-8">
+      <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-3 text-sm font-medium bg-amber-500 text-black transition" data-translate="admin.login">Вход</button>
+      <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-3 text-sm font-medium transition hover:bg-white/5" data-translate="admin.register">Регистрация</button>
+    </div>
+
+    <!-- Форма входа -->
+    <form id="login-form" class="space-y-5" onsubmit="handleLogin(event)">
+      <div>
+        <label class="block text-sm mb-2" data-translate="auth.email">Email</label>
+        <input type="email" id="login-email" required class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" placeholder="admin@luxuryhaven.com" data-translate-placeholder="auth.emailPlaceholder">
+      </div>
+      <div>
+        <label class="block text-sm mb-2" data-translate="auth.password">Пароль</label>
+        <input type="password" id="login-password" required class="w-full px-5 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" placeholder="••••••" data-translate-placeholder="auth.passwordPlaceholder">
+      </div>
+      <button type="submit" id="login-btn" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition transform hover:scale-[1.02] active:scale-[0.98]" data-translate="auth.signIn">Войти</button>
+    </form>
+
+    <!-- Форма регистрации -->
+    <form id="register-form" class="space-y-4 hidden" onsubmit="handleRegister(event)">
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="block text-sm mb-2" data-translate="auth.firstname">Имя</label><input type="text" id="reg-firstname" required class="w-full px-4 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" data-translate-placeholder="auth.firstnamePlaceholder"></div>
+        <div><label class="block text-sm mb-2" data-translate="auth.lastname">Фамилия</label><input type="text" id="reg-lastname" required class="w-full px-4 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" data-translate-placeholder="auth.lastnamePlaceholder"></div>
+      </div>
+      <div><label class="block text-sm mb-2" data-translate="auth.email">Email</label><input type="email" id="reg-email" required class="w-full px-4 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" data-translate-placeholder="auth.emailPlaceholder"></div>
+      <div>
+        <label class="block text-sm mb-2" data-translate="auth.phone">Телефон</label>
+        <div class="flex">
+          <select id="reg-phone-code" class="px-4 py-3 bg-zinc-800 border border-r-0 border-white/20 rounded-l-2xl focus:outline-none">
+            <option value="+7">+7 (RU/KZ)</option>
+            <option value="+998">+998 (UZ)</option>
+          </select>
+          <input type="tel" id="reg-phone" required class="flex-1 px-4 py-3 bg-zinc-800 border border-white/20 rounded-r-2xl focus:outline-none focus:border-amber-400 transition" data-translate-placeholder="auth.phonePlaceholder">
+        </div>
+      </div>
+      <div><label class="block text-sm mb-2" data-translate="auth.password">Пароль</label><input type="password" id="reg-password" required class="w-full px-4 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" data-translate-placeholder="auth.passwordPlaceholder"></div>
+      <div><label class="block text-sm mb-2" data-translate="admin.code">Код администратора</label><input type="password" id="reg-admin-code" required class="w-full px-4 py-3 bg-zinc-800 border border-white/20 rounded-2xl focus:outline-none focus:border-amber-400 transition" data-translate-placeholder="admin.codePlaceholder"></div>
+      <button type="submit" id="register-btn" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition transform hover:scale-[1.02] active:scale-[0.98]" data-translate="auth.signUp">Зарегистрироваться</button>
+    </form>
+
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[300]">
+      <div class="bg-zinc-900 rounded-3xl max-w-md w-full mx-4 p-8 text-center">
+        <div class="text-6xl mb-4" id="alert-icon">⚠️</div>
+        <h3 class="text-2xl font-semibold mb-3" id="alert-title"></h3>
+        <p class="text-gray-400 mb-6" id="alert-message"></p>
+        <button onclick="closeAlert()" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition" data-translate="auth.close">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="js/admin-auth.js"></script>
+</body>
+</html>

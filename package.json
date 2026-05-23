@@ -1,0 +1,16 @@
+{
+  "name": "hotel-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Luxury Haven hotel website with client and admin Express servers",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start.js",
+    "install:all": "npm install --prefix shared && npm install --prefix Client/server && npm install --prefix admin/server",
+    "start:client": "npm start --prefix Client/server",
+    "start:admin": "npm start --prefix admin/server"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

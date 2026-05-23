@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-translate="admin.pageTitle">Dashboard • Luxury Haven Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+    @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 5px rgba(251,191,36,0.3); } 50% { box-shadow: 0 0 20px rgba(251,191,36,0.6); } }
+    @keyframes pageExit { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
+    
+    .animate-fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+    .animate-fade-in-down { animation: fadeInDown 0.5s ease forwards; }
+    .animate-scale-in { animation: scaleIn 0.3s ease forwards; }
+    .page-exit { animation: pageExit 0.5s ease forwards; }
+    
+    body { font-family: 'Inter', sans-serif; }
+    .title-font { font-family: 'Playfair Display', serif; }
+    
+    .stat-card { transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 35px rgba(0,0,0,0.4); }
+    
+    .booking-row { transition: all 0.2s ease; }
+    .booking-row:hover { background: rgba(251,191,36,0.03); }
+    
+    .tab-btn.active { background: #f59e0b; color: #000; }
+    
+    .modal-overlay { backdrop-filter: blur(8px); }
+    
+    .btn-hover { transition: all 0.3s ease; }
+    .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-zinc-950 text-white">
+
+  <header class="bg-black/95 border-b border-white/10 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-4">
+        <h1 class="text-2xl font-bold title-font">LUXURY HAVEN</h1>
+        <span class="px-3 py-1 bg-amber-500/20 text-amber-400 text-xs rounded-full">Admin</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="flex border border-white/30 rounded-full overflow-hidden text-sm">
+          <button onclick="switchLang('ru')" id="btn-ru" class="px-4 py-1.5 transition hover:bg-amber-500/20">RU</button>
+          <button onclick="switchLang('en')" id="btn-en" class="px-4 py-1.5 transition hover:bg-amber-500/20">EN</button>
+        </div>
+        <span id="admin-name" class="text-sm text-gray-400"></span>
+        <button onclick="logout()" data-translate="logout" class="px-5 py-2 border border-red-400/30 text-red-400 rounded-full hover:bg-red-400/10 transition text-sm">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="bg-zinc-900 border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-8 flex gap-1">
+      <button class="tab-btn active px-6 py-3 text-sm font-medium rounded-t-lg transition" data-tab="dashboard" data-translate="dashboard">📊 Dashboard</button>
+      <button class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition" data-tab="bookings" data-translate="bookings">📋 Bookings</button>
+      <button class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition" data-tab="rooms" data-translate="rooms">🏨 Rooms</button>
+      <button class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition" data-tab="accounting" data-translate="accounting">💰 Accounting</button>
+      <button class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition" data-tab="history" data-translate="history">📜 History</button>
+      <button class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition" data-tab="settings" data-translate="settings">⚙️ Settings</button>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-8 py-8">
+    <div id="tab-content"></div>
+  </main>
+
+  <div id="alert-modal" class="hidden fixed inset-0 bg-black/80 modal-overlay flex items-center justify-center z-[300]">
+    <div class="bg-zinc-900 rounded-3xl max-w-md w-full mx-4 p-8 text-center animate-scale-in">
+      <div class="text-6xl mb-4" id="alert-icon">⚠️</div>
+      <h3 class="text-2xl font-semibold mb-3" id="alert-title"></h3>
+      <p class="text-gray-400 mb-6" id="alert-message"></p>
+      <button onclick="closeAlert()" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-2xl transition" data-translate="close">Close</button>
+    </div>
+  </div>
+
+  <!-- JS файлы -->
+  <script src="js/admin-api.js"></script>
+  <script src="js/admin-dashboard.js"></script>
+  <script src="js/admin-bookings.js"></script>
+  <script src="js/admin-rooms.js"></script>
+  <script src="js/admin-accounting.js"></script>
+  <script src="js/admin-history.js"></script>
+  <script src="js/admin-settings.js"></script>
+  <script>
+    loadDashboard();
+  </script>
+</body>
+</html>

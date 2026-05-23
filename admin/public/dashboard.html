@@ -23,18 +23,30 @@
     body { font-family: 'Inter', sans-serif; }
     .title-font { font-family: 'Playfair Display', serif; }
     
-    .stat-card { transition: all 0.3s ease; }
+    .stat-card { transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: space-between; }
     .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 35px rgba(0,0,0,0.4); }
     
-    .booking-row { transition: all 0.2s ease; }
+    .booking-row { transition: all 0.2s ease; display: flex; flex-direction: column; }
     .booking-row:hover { background: rgba(251,191,36,0.03); }
     
+    .tab-list { display: flex; gap: 0.75rem; overflow-x: auto; padding: 0.75rem 0; }
+    .tab-list::-webkit-scrollbar { height: 8px; }
+    .tab-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 9999px; }
+    .tab-btn { flex: 0 0 auto; min-width: 8rem; white-space: nowrap; }
     .tab-btn.active { background: #f59e0b; color: #000; }
     
+    .responsive-stats { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 1rem; }
     .modal-overlay { backdrop-filter: blur(8px); }
     
     .btn-hover { transition: all 0.3s ease; }
     .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+    @media (min-width: 640px) {
+      .responsive-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1280px) {
+      .responsive-stats { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    }
 
     @media (max-width: 1024px) {
       header .max-w-7xl,
@@ -65,7 +77,7 @@
       }
 
       .tab-btn {
-        flex: 0 0 auto;
+        min-width: 7.5rem;
         margin-bottom: 0.5rem;
       }
 
@@ -105,6 +117,15 @@
       .booking-row {
         gap: 1rem;
       }
+
+      header .flex {
+        align-items: flex-start;
+      }
+
+      header .flex > div:last-child {
+        width: 100%;
+        justify-content: flex-start;
+      }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -112,24 +133,24 @@
 <body class="bg-zinc-950 text-white">
 
   <header class="bg-black/95 border-b border-white/10 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
-      <div class="flex items-center gap-4">
+    <div class="max-w-7xl mx-auto px-8 py-4 flex flex-wrap justify-between items-center gap-4">
+      <div class="flex flex-wrap items-center gap-3">
         <h1 class="text-2xl font-bold title-font">LUXURY HAVEN</h1>
         <span class="px-3 py-1 bg-amber-500/20 text-amber-400 text-xs rounded-full">Admin</span>
       </div>
-      <div class="flex items-center gap-4">
+      <div class="flex flex-wrap items-center gap-3">
         <div class="flex border border-white/30 rounded-full overflow-hidden text-sm">
           <button onclick="switchLang('ru')" id="btn-ru" class="px-4 py-1.5 transition hover:bg-amber-500/20">RU</button>
           <button onclick="switchLang('en')" id="btn-en" class="px-4 py-1.5 transition hover:bg-amber-500/20">EN</button>
         </div>
-        <span id="admin-name" class="text-sm text-gray-400"></span>
+        <span id="admin-name" class="text-sm text-gray-400 hidden sm:inline-block"></span>
         <button onclick="logout()" data-translate="logout" class="px-5 py-2 border border-red-400/30 text-red-400 rounded-full hover:bg-red-400/10 transition text-sm">Logout</button>
       </div>
     </div>
   </header>
 
   <nav class="bg-zinc-900 border-b border-white/5">
-    <div class="max-w-7xl mx-auto px-8 flex gap-1">
+    <div class="max-w-7xl mx-auto px-8 tab-list">
       <button class="tab-btn active px-6 py-3 text-sm font-medium rounded-t-lg transition" data-tab="dashboard" data-translate="dashboard">📊 Dashboard</button>
       <button class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition" data-tab="bookings" data-translate="bookings">📋 Bookings</button>
       <button class="tab-btn px-6 py-3 text-sm font-medium rounded-t-lg transition" data-tab="rooms" data-translate="rooms">🏨 Rooms</button>

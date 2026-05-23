@@ -35,6 +35,77 @@
     
     .btn-hover { transition: all 0.3s ease; }
     .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+    @media (max-width: 1024px) {
+      header .max-w-7xl,
+      nav .max-w-7xl,
+      main {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      header .flex {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      nav .max-w-7xl {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      nav .max-w-7xl::-webkit-scrollbar {
+        height: 8px;
+      }
+
+      nav .max-w-7xl::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.15);
+        border-radius: 9999px;
+      }
+
+      .tab-btn {
+        flex: 0 0 auto;
+        margin-bottom: 0.5rem;
+      }
+
+      .booking-row {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: left;
+      }
+
+      .booking-row > div:last-child {
+        margin-top: 0.75rem;
+      }
+
+      .responsive-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .tab-btn {
+        padding: 0.85rem 1rem;
+        font-size: 0.82rem;
+      }
+
+      header .flex {
+        gap: 0.5rem;
+      }
+
+      .stat-card {
+        padding: 1rem;
+      }
+
+      .responsive-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .booking-row {
+        gap: 1rem;
+      }
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>

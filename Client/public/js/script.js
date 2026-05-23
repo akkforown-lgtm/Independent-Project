@@ -512,6 +512,12 @@ function getCurrentLanguage() {
   return localStorage.getItem('selectedLanguage') || 'ru';
 }
 
+function toggleMobileMenu() {
+  const mobileNav = document.getElementById('mobile-nav');
+  if (!mobileNav) return;
+  mobileNav.classList.toggle('open');
+}
+
 // ==================== ЗАПУСК ПРИ ЗАГРУЗКЕ ====================
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -91,3 +91,58 @@ input:focus, select:focus {
 .transition {
   transition: all 0.3s ease;
 }
+
+/* ==================== МОБИЛЬНАЯ НАВИГАЦИЯ И ЛОГО */
+.site-logo {
+  max-height: 48px;
+}
+
+#mobile-nav {
+  display: none;
+}
+
+#mobile-nav.open {
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .section {
+    padding-top: 5rem;
+  }
+
+  nav .max-w-7xl {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .service-card, .room-card, .about-image, .modal-content {
+    width: 100%;
+  }
+
+  .nav-link {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .title-font {
+    font-size: inherit;
+  }
+
+  .site-logo {
+    max-height: 40px;
+  }
+
+  .nav-link {
+    width: 100%;
+  }
+
+  .btn-primary {
+    width: 100%;
+  }
+
+  .max-w-7xl {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}

@@ -51,8 +51,26 @@ class ApiClient {
     const data = await response.json();
 
     if (!response.ok) {
-      const error = new Error(data.message || data.error || 'Ошибка запроса');
-      error.field = data.field;
+      // Handle error object (when API returns {error: {field: "message"}})
+      let errorMessage = 'Ошибка запроса';
+      let errorField = null;
+
+      if (typeof data.error === 'object' && data.error !== null) {
+        // If error is an object with field errors like {email: "User not found"}
+        const fields = Object.keys(data.error);
+        if (fields.length > 0) {
+          errorField = fields[0];
+          errorMessage = data.error[errorField];
+        }
+      } else if (typeof data.error === 'string') {
+        // If error is a string
+        errorMessage = data.error;
+      } else if (data.message) {
+        errorMessage = data.message;
+      }
+
+      const error = new Error(errorMessage);
+      error.field = errorField;
       error.status = response.status;
       error.code = data.error;
       throw error;

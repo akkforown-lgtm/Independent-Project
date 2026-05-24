@@ -14,7 +14,7 @@ async function loadAccounting() {
         </div>
 
         <!-- Основная статистика -->
-        <div class="grid grid-cols-4 gap-6 mb-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
           <div class="stat-card bg-zinc-900 rounded-2xl p-6 border border-white/5">
             <p class="text-gray-400 text-sm mb-2">💰 ${tr('revenue')}</p>
             <p class="text-4xl font-bold text-amber-400">$${data.totalRevenue.toLocaleString()}</p>
@@ -33,7 +33,7 @@ async function loadAccounting() {
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-8 mb-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
           <!-- По категориям номеров -->
           <div class="bg-zinc-900 rounded-2xl p-6">
             <h3 class="text-lg font-semibold mb-4">📊 ${tr('byCategory')}</h3>
@@ -60,7 +60,7 @@ async function loadAccounting() {
         <!-- 🔥 Доходы по услугам -->
         <div class="bg-zinc-900 rounded-2xl p-6">
           <h3 class="text-lg font-semibold mb-4">📦 ${tr('incomeByServices')}</h3>
-          <div class="grid grid-cols-6 gap-4">
+          <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
             ${[
               { icon: '🍽️', key: 'restaurant', label: tr('restaurant') },
               { icon: '🍸', key: 'bar', label: tr('bar') },

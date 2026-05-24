@@ -7,7 +7,11 @@
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": ["hotel", "booking", "luxury"],
+  "keywords": [
+    "hotel",
+    "booking",
+    "luxury"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -19,6 +23,10 @@
     "mongoose": "^7.6.3"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "autoprefixer": "^10.5.0",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.0.1",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^4.3.0"
   }
 }

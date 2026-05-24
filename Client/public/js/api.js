@@ -73,6 +73,9 @@ class ApiClient {
       error.field = errorField;
       error.status = response.status;
       error.code = data.error;
+      if (typeof data.error === 'object' && data.error !== null) {
+        error.errors = data.error;
+      }
       throw error;
     }
 
@@ -146,6 +149,18 @@ class ApiClient {
   // Бронирования
   async createBooking(bookingData) {
     return this.post('/bookings', bookingData);
+  }
+
+  async holdBooking(bookingData) {
+    return this.post('/bookings/hold', bookingData);
+  }
+
+  async confirmHold(bookingId) {
+    return this.post(`/bookings/hold/${bookingId}/confirm`);
+  }
+
+  async cancelHold(bookingId) {
+    return this.delete(`/bookings/hold/${bookingId}`);
   }
 
   async getRegionStatus(city, checkIn, checkOut) {

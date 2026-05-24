@@ -9,7 +9,8 @@ module.exports = function(mongoose) {
     checkOut: { type: Date, required: true },
     nights: { type: Number, required: true },
     totalPrice: { type: Number, required: true },
-    status: { type: String, enum: ['active', 'pending_change', 'pending_cancellation', 'changed', 'cancelled', 'rejected', 'completed'], default: 'active' },
+    status: { type: String, enum: ['hold', 'active', 'pending_change', 'pending_cancellation', 'changed', 'cancelled', 'rejected', 'completed'], default: 'active' },
+    expiresAt: { type: Date, default: null },
     changeRequest: { type: mongoose.Schema.Types.Mixed, default: null },
     
     // Approval/Rejection tracking
@@ -55,6 +56,8 @@ module.exports = function(mongoose) {
     cancelledByName: { type: String, default: '' },
     cancelledAt: { type: Date, default: null }
   }, { timestamps: true });
+
+  bookingSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
   bookingSchema.pre('save', function(next) {
     if (this.checkOut <= this.checkIn) return next(new Error('Дата выезда должна быть позже даты заезда'));

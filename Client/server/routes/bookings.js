@@ -39,6 +39,38 @@ function isValidObjectId(id) {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
+// In-process lock/mutex per city to handle concurrency
+const bookingLocks = new Map();
+
+async function withBookingLock(city, fn) {
+  const normalizedCity = String(city).trim().toLowerCase();
+  
+  if (!bookingLocks.has(normalizedCity)) {
+    bookingLocks.set(normalizedCity, Promise.resolve());
+  }
+  
+  const currentLock = bookingLocks.get(normalizedCity);
+  
+  let resolveLock;
+  const nextLock = new Promise(resolve => {
+    resolveLock = resolve;
+  });
+  
+  bookingLocks.set(normalizedCity, nextLock);
+  
+  const resultPromise = currentLock.then(() => fn()).finally(() => {
+    resolveLock();
+  });
+  
+  nextLock.then(() => {
+    if (bookingLocks.get(normalizedCity) === nextLock) {
+      bookingLocks.delete(normalizedCity);
+    }
+  });
+  
+  return resultPromise;
+}
+
 router.post('/', protect, async (req, res) => {
   try {
     // Validate booking data
@@ -49,32 +81,39 @@ router.post('/', protect, async (req, res) => {
 
     const { roomName, roomPrice, roomCategory, city, checkIn, checkOut, nights, totalPrice } = req.body;
 
-    const overlappingCount = await countOverlappingRegionBookings(city, checkIn, checkOut);
-    const regionLimit = await getRegionLimit(city);
+    const booking = await withBookingLock(city, async () => {
+      const overlappingCount = await countOverlappingRegionBookings(city, checkIn, checkOut);
+      const regionLimit = await getRegionLimit(city);
 
-    if (overlappingCount >= regionLimit) {
+      if (overlappingCount >= regionLimit) {
+        throw new Error('REGION_LIMIT');
+      }
+
+      return await Booking.create({
+        user: req.user._id,
+        roomName,
+        roomPrice,
+        roomCategory: roomCategory || 'classic',
+        city,
+        checkIn,
+        checkOut,
+        nights,
+        totalPrice,
+        notifications: [{ message: 'Бронирование создано', type: 'success', createdAt: new Date() }]
+      });
+    });
+
+    res.status(201).json({ success: true, data: booking });
+  } catch (error) {
+    if (error.message === 'REGION_LIMIT') {
+      const { city } = req.body;
+      const regionLimit = await getRegionLimit(city);
       return res.status(400).json({
         success: false,
         error: `Регион ${city} уже содержит ${regionLimit} активных бронирований на выбранные даты`,
         code: 'REGION_LIMIT'
       });
     }
-
-    const booking = await Booking.create({
-      user: req.user._id,
-      roomName,
-      roomPrice,
-      roomCategory: roomCategory || 'classic',
-      city,
-      checkIn,
-      checkOut,
-      nights,
-      totalPrice,
-      notifications: [{ message: 'Бронирование создано', type: 'success', createdAt: new Date() }]
-    });
-
-    res.status(201).json({ success: true, data: booking });
-  } catch (error) {
     console.error('Create booking error:', error.message);
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).reduce((acc, err) => {
@@ -84,6 +123,108 @@ router.post('/', protect, async (req, res) => {
       return res.status(400).json({ success: false, error: messages });
     }
     res.status(500).json({ success: false, error: { server: 'Ошибка создания бронирования' } });
+  }
+});
+
+router.post('/hold', protect, async (req, res) => {
+  try {
+    const validation = validateBookingData(req.body);
+    if (!validation.valid) {
+      return res.status(400).json({ success: false, error: validation.errors });
+    }
+
+    const { roomName, roomPrice, roomCategory, city, checkIn, checkOut, nights, totalPrice } = req.body;
+
+    const booking = await withBookingLock(city, async () => {
+      const overlappingCount = await countOverlappingRegionBookings(city, checkIn, checkOut);
+      const regionLimit = await getRegionLimit(city);
+
+      if (overlappingCount >= regionLimit) {
+        throw new Error('REGION_LIMIT');
+      }
+
+      return await Booking.create({
+        user: req.user._id,
+        roomName,
+        roomPrice,
+        roomCategory: roomCategory || 'classic',
+        city,
+        checkIn,
+        checkOut,
+        nights,
+        totalPrice,
+        status: 'hold',
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes hold
+        notifications: [{ message: 'Бронирование заблокировано (ожидание оплаты)', type: 'info', createdAt: new Date() }]
+      });
+    });
+
+    res.status(201).json({ success: true, data: booking });
+  } catch (error) {
+    if (error.message === 'REGION_LIMIT') {
+      const { city } = req.body;
+      const regionLimit = await getRegionLimit(city);
+      return res.status(400).json({
+        success: false,
+        error: `Регион ${city} уже содержит ${regionLimit} активных бронирований на выбранные даты`,
+        code: 'REGION_LIMIT'
+      });
+    }
+    console.error('Hold booking error:', error.message);
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).reduce((acc, err) => {
+        acc[err.path] = err.message;
+        return acc;
+      }, {});
+      return res.status(400).json({ success: false, error: messages });
+    }
+    res.status(500).json({ success: false, error: { server: 'Ошибка создания удержания брони' } });
+  }
+});
+
+router.post('/hold/:id/confirm', protect, async (req, res) => {
+  try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Неверный формат ID' });
+    }
+    const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id });
+    if (!booking) {
+      return res.status(404).json({ success: false, error: 'Время бронирования истекло или бронь не найдена', code: 'HOLD_EXPIRED' });
+    }
+    if (booking.status !== 'hold') {
+      return res.status(400).json({ success: false, error: 'Бронирование уже подтверждено или недействительно' });
+    }
+    
+    booking.status = 'active';
+    booking.expiresAt = undefined;
+    booking.notifications.push({ message: 'Бронирование создано', type: 'success', createdAt: new Date() });
+    await booking.save();
+    
+    res.json({ success: true, data: booking });
+  } catch (error) {
+    console.error('Confirm hold error:', error);
+    res.status(500).json({ success: false, error: 'Ошибка подтверждения бронирования' });
+  }
+});
+
+router.delete('/hold/:id', protect, async (req, res) => {
+  try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, error: 'Неверный формат ID' });
+    }
+    const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id });
+    if (!booking) {
+      return res.status(404).json({ success: false, error: 'Бронирование не найдено' });
+    }
+    if (booking.status !== 'hold') {
+      return res.status(400).json({ success: false, error: 'Можно отменить только удержание брони' });
+    }
+
+    await Booking.deleteOne({ _id: req.params.id });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete hold error:', error);
+    res.status(500).json({ success: false, error: 'Ошибка отмены удержания брони' });
   }
 });
 

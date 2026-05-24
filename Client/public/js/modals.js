@@ -146,11 +146,42 @@ async function proceedToPayment() {
   const nights = calculateNights(checkin, checkout);
   const totalPrice = currentRoom.price * nights;
   const deposit = Math.round(totalPrice * 0.2);
+  const category = currentRoom.category || 'classic';
 
-  pendingBooking = { 
-    roomName: currentRoom.name, roomPrice: currentRoom.price, 
-    city, checkIn: checkin, checkOut: checkout, nights, totalPrice 
-  };
+  // Disable proceed button and show reservation text to prevent double booking
+  const proceedBtn = document.querySelector('button[onclick="proceedToPayment()"]');
+  const originalText = proceedBtn ? proceedBtn.innerHTML : '';
+  if (proceedBtn) {
+    proceedBtn.innerHTML = '<span class="inline-block animate-spin">🔄</span> ' + (lang === 'ru' ? 'Бронирование...' : 'Reserving...');
+    proceedBtn.disabled = true;
+  }
+
+  try {
+    const response = await window.api.holdBooking({
+      roomName: currentRoom.name,
+      roomPrice: currentRoom.price,
+      roomCategory: category,
+      city,
+      checkIn: checkin,
+      checkOut: checkout,
+      nights,
+      totalPrice
+    });
+    
+    pendingBooking = response.data || response;
+  } catch (error) {
+    if (proceedBtn) {
+      proceedBtn.innerHTML = originalText;
+      proceedBtn.disabled = false;
+    }
+    showAlertModal('error', error.message);
+    return;
+  }
+
+  if (proceedBtn) {
+    proceedBtn.innerHTML = originalText;
+    proceedBtn.disabled = false;
+  }
 
   document.getElementById('payment-total').textContent = `$${totalPrice}`;
   document.getElementById('payment-deposit').textContent = `$${deposit}`;
@@ -188,9 +219,19 @@ async function loadSavedCards() {
   });
 }
 
-function closePaymentModal() {
+async function closePaymentModal() {
   const modal = document.getElementById('payment-modal');
   if (modal) modal.classList.add('hidden');
+  
+  if (pendingBooking && pendingBooking._id) {
+    try {
+      console.log('Releasing booking hold:', pendingBooking._id);
+      await window.api.cancelHold(pendingBooking._id);
+    } catch (error) {
+      console.error('Failed to release booking hold:', error);
+    }
+    pendingBooking = null;
+  }
 }
 
 function openRoomBookingsModal(roomName) {
@@ -270,21 +311,16 @@ async function processPayment() {
 async function saveBookingToAPI() {
   const data = pendingBooking;
   if (!data) return null;
-  
-  const category = currentRoom.category || 'classic';
 
   if (window.api && window.api.isAuthenticated()) {
     try {
-      const response = await window.api.createBooking({
-        roomName: data.roomName, roomPrice: data.roomPrice, roomCategory: category,
-        city: data.city, checkIn: data.checkIn, checkOut: data.checkOut,
-        nights: data.nights, totalPrice: data.totalPrice
-      });
-      console.log('✅ Сохранено в MongoDB:', response);
+      const response = await window.api.confirmHold(data._id);
+      console.log('✅ Подтверждено в MongoDB:', response);
+      pendingBooking = null; // Clear so closePaymentModal won't release it
       return response.data || response;
     } catch (err) {
-      console.error('❌ Ошибка MongoDB:', err.message);
-      showCustomAlert('error', 'Ошибка сохранения: ' + err.message);
+      console.error('❌ Ошибка подтверждения в MongoDB:', err.message);
+      showCustomAlert('error', 'Ошибка подтверждения: ' + err.message);
       return null;
     }
   }

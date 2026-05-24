@@ -21,14 +21,22 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, error: validation.errors });
     }
 
-    const existingEmail = await User.findOne({ email: email.toLowerCase() });
+    // Check both email and phone duplicates simultaneously
+    const duplicateErrors = {};
+    const [existingEmail, existingPhone] = await Promise.all([
+      User.findOne({ email: email.toLowerCase() }),
+      User.findOne({ phone })
+    ]);
+
     if (existingEmail) {
-      return res.status(400).json({ success: false, error: { email: 'Пользователь с таким email уже существует' } });
+      duplicateErrors.email = 'Пользователь с таким email уже существует';
+    }
+    if (existingPhone) {
+      duplicateErrors.phone = 'Пользователь с таким телефоном уже существует';
     }
 
-    const existingPhone = await User.findOne({ phone });
-    if (existingPhone) {
-      return res.status(400).json({ success: false, error: { phone: 'Пользователь с таким телефоном уже существует' } });
+    if (Object.keys(duplicateErrors).length > 0) {
+      return res.status(400).json({ success: false, error: duplicateErrors });
     }
 
     const user = await User.create({ firstName, lastName, email: email.toLowerCase(), phone, password });
@@ -48,11 +56,27 @@ router.post('/register', async (req, res) => {
     }
     
     if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern)[0];
-      const message = field === 'email' ? 
-        'Email уже зарегистрирован' : 
-        'Телефон уже зарегистрирован';
-      return res.status(400).json({ success: false, error: { [field]: message } });
+      const duplicateErrors = {};
+      const [existingEmail, existingPhone] = await Promise.all([
+        User.findOne({ email: req.body.email?.toLowerCase() }),
+        User.findOne({ phone: req.body.phone })
+      ]);
+
+      if (existingEmail) {
+        duplicateErrors.email = 'Пользователь с таким email уже существует';
+      }
+      if (existingPhone) {
+        duplicateErrors.phone = 'Пользователь с таким телефоном уже существует';
+      }
+
+      if (Object.keys(duplicateErrors).length === 0) {
+        const field = Object.keys(error.keyPattern)[0];
+        const message = field === 'email' ? 
+          'Email уже зарегистрирован' : 
+          'Телефон уже зарегистрирован';
+        duplicateErrors[field] = message;
+      }
+      return res.status(400).json({ success: false, error: duplicateErrors });
     }
     
     res.status(500).json({ success: false, error: { server: 'Ошибка сервера при регистрации' } });

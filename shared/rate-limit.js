@@ -61,7 +61,7 @@ const rateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000, keyGenerator = 
 /**
  * Strict rate limit for auth endpoints
  */
-const authRateLimit = rateLimit(100000, 15 * 60 * 1000);
+const authRateLimit = rateLimit(15, 15 * 60 * 1000);
 
 /**
  * General rate limit for API

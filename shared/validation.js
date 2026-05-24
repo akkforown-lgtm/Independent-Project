@@ -8,8 +8,26 @@ const validateEmail = (email) => {
 };
 
 const validatePhone = (phone) => {
-  const phoneRegex = /^[\d\s\-\+\(\)]{10,}$/;
-  return phoneRegex.test(phone.replace(/\s/g, ''));
+  if (typeof phone !== 'string') return false;
+  const trimmed = phone.trim();
+  
+  // Only allow digits, spaces, hyphens, parentheses, and optional leading plus
+  const phoneFormatRegex = /^\+?[\d\s\-\(\)]+$/;
+  if (!phoneFormatRegex.test(trimmed)) {
+    return false;
+  }
+  
+  const digits = trimmed.replace(/\D/g, '');
+  
+  if (trimmed.startsWith('+7') || trimmed.startsWith('7')) {
+    return digits.length === 11 && digits.startsWith('7');
+  }
+  
+  if (trimmed.startsWith('+998') || trimmed.startsWith('998')) {
+    return digits.length === 12 && digits.startsWith('998');
+  }
+  
+  return false;
 };
 
 const validatePassword = (password) => {
@@ -78,7 +96,7 @@ const validateRegistrationData = (data) => {
   }
 
   if (!data.phone || !validatePhone(data.phone)) {
-    errors.phone = 'Некорректный номер телефона (минимум 10 цифр)';
+    errors.phone = 'Некорректный номер телефона (допускается +7 и 11 цифр, либо +998 и 12 цифр)';
   }
 
   const passwordValidation = validatePassword(data.password);

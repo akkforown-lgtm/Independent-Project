@@ -78,12 +78,16 @@ async function start() {
     const roomSchema = require('../../shared/schemas/roomSchema')(mongoose);
     const regionLimitSchema = require('../../shared/schemas/regionLimitSchema')(mongoose);
     
-    mongoose.model('User', userSchema);
-    mongoose.model('Booking', bookingSchema);
+    const User = mongoose.model('User', userSchema);
+    const Booking = mongoose.model('Booking', bookingSchema);
     mongoose.model('Room', roomSchema);
     mongoose.model('RegionLimit', regionLimitSchema);
     
-    console.log('Client API: models registered (users, bookings, rooms, region limits)');
+    // Explicitly build/sync indexes in background
+    User.createIndexes().catch(err => console.error('Error creating User indexes:', err));
+    Booking.createIndexes().catch(err => console.error('Error creating Booking indexes:', err));
+    
+    console.log('Client API: models registered (users, bookings, rooms, region limits) and indexes queued');
 
     const authRoutes = require('./routes/auth');
     const bookingRoutes = require('./routes/bookings');

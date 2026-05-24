@@ -41,17 +41,37 @@ async function handleLogin(event) {
     btn.innerHTML = originalText;
     btn.disabled = false;
     
-    if (error.field === 'email') {
+    let hasFieldErrors = false;
+    if (error.errors && typeof error.errors === 'object') {
+      if (error.errors.email) {
+        email.classList.add('input-error', 'shake');
+        emailError.textContent = error.errors.email;
+        emailError.classList.remove('hidden');
+        setTimeout(() => email.classList.remove('shake'), 600);
+        hasFieldErrors = true;
+      }
+      if (error.errors.password) {
+        password.classList.add('input-error', 'shake');
+        passwordError.textContent = error.errors.password;
+        passwordError.classList.remove('hidden');
+        setTimeout(() => password.classList.remove('shake'), 600);
+        hasFieldErrors = true;
+      }
+    } else if (error.field === 'email') {
       email.classList.add('input-error', 'shake');
       emailError.textContent = error.message;
       emailError.classList.remove('hidden');
       setTimeout(() => email.classList.remove('shake'), 600);
+      hasFieldErrors = true;
     } else if (error.field === 'password') {
       password.classList.add('input-error', 'shake');
       passwordError.textContent = error.message;
       passwordError.classList.remove('hidden');
       setTimeout(() => password.classList.remove('shake'), 600);
-    } else {
+      hasFieldErrors = true;
+    }
+    
+    if (!hasFieldErrors) {
       form.classList.add('shake');
       setTimeout(() => form.classList.remove('shake'), 600);
       showCustomAlert('error', error.message);
@@ -103,6 +123,31 @@ async function handleRegister(event) {
   
   const fullPhone = fields.phoneCode.value + fields.phone.value;
   
+  const validatePhoneClient = (phone) => {
+    if (typeof phone !== 'string') return false;
+    const trimmed = phone.trim();
+    const phoneFormatRegex = /^\+?[\d\s\-\(\)]+$/;
+    if (!phoneFormatRegex.test(trimmed)) return false;
+    const digits = trimmed.replace(/\D/g, '');
+    if (trimmed.startsWith('+7') || trimmed.startsWith('7')) {
+      return digits.length === 11 && digits.startsWith('7');
+    }
+    if (trimmed.startsWith('+998') || trimmed.startsWith('998')) {
+      return digits.length === 12 && digits.startsWith('998');
+    }
+    return false;
+  };
+
+  if (!validatePhoneClient(fullPhone)) {
+    fields.phone.classList.add('input-error', 'shake');
+    errors.phone.textContent = lang === 'ru' 
+      ? 'Некорректный номер телефона (допускается +7 и 11 цифр, либо +998 и 12 цифр)' 
+      : 'Invalid phone number (+7 with 11 digits, or +998 with 12 digits)';
+    errors.phone.classList.remove('hidden');
+    setTimeout(() => fields.phone.classList.remove('shake'), 600);
+    return;
+  }
+  
   const btn = document.getElementById('register-btn');
   const originalText = btn.innerHTML;
   btn.innerHTML = '<span class="inline-block animate-spin">🔄</span> ' + (lang === 'ru' ? 'Регистрация...' : 'Registering...');
@@ -127,17 +172,54 @@ async function handleRegister(event) {
     btn.innerHTML = originalText;
     btn.disabled = false;
     
-    if (error.field === 'email') {
+    let hasFieldErrors = false;
+    if (error.errors && typeof error.errors === 'object') {
+      if (error.errors.email) {
+        fields.email.classList.add('input-error', 'shake');
+        errors.email.textContent = error.errors.email;
+        errors.email.classList.remove('hidden');
+        setTimeout(() => fields.email.classList.remove('shake'), 600);
+        hasFieldErrors = true;
+      }
+      if (error.errors.phone) {
+        fields.phone.classList.add('input-error', 'shake');
+        errors.phone.textContent = error.errors.phone;
+        errors.phone.classList.remove('hidden');
+        setTimeout(() => fields.phone.classList.remove('shake'), 600);
+        hasFieldErrors = true;
+      }
+      if (error.errors.password) {
+        fields.password.classList.add('input-error', 'shake');
+        errors.password.textContent = error.errors.password;
+        errors.password.classList.remove('hidden');
+        setTimeout(() => fields.password.classList.remove('shake'), 600);
+        hasFieldErrors = true;
+      }
+      if (error.errors.firstName) {
+        fields.firstName.classList.add('input-error', 'shake');
+        setTimeout(() => fields.firstName.classList.remove('shake'), 600);
+        hasFieldErrors = true;
+      }
+      if (error.errors.lastName) {
+        fields.lastName.classList.add('input-error', 'shake');
+        setTimeout(() => fields.lastName.classList.remove('shake'), 600);
+        hasFieldErrors = true;
+      }
+    } else if (error.field === 'email') {
       fields.email.classList.add('input-error', 'shake');
       errors.email.textContent = error.message;
       errors.email.classList.remove('hidden');
       setTimeout(() => fields.email.classList.remove('shake'), 600);
+      hasFieldErrors = true;
     } else if (error.field === 'phone') {
       fields.phone.classList.add('input-error', 'shake');
       errors.phone.textContent = error.message;
       errors.phone.classList.remove('hidden');
       setTimeout(() => fields.phone.classList.remove('shake'), 600);
-    } else {
+      hasFieldErrors = true;
+    }
+    
+    if (!hasFieldErrors) {
       form.classList.add('shake');
       setTimeout(() => form.classList.remove('shake'), 600);
       showCustomAlert('error', error.message);

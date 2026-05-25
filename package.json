@@ -6,6 +6,7 @@
   "main": "start.js",
   "scripts": {
     "start": "node start.js",
+    "build:css": "npm exec --prefix Client/server tailwindcss -- -i Client/public/css/tailwind.css -o Client/public/css/tailwind.generated.css --content \"Client/public/**/*.html\" --content \"Client/public/js/**/*.js\" --content \"admin/public/**/*.html\" --content \"admin/public/js/**/*.js\" && npm exec --prefix Client/server tailwindcss -- -i Client/public/css/tailwind.css -o admin/public/css/tailwind.generated.css --content \"Client/public/**/*.html\" --content \"Client/public/js/**/*.js\" --content \"admin/public/**/*.html\" --content \"admin/public/js/**/*.js\"",
     "install:all": "npm install --prefix shared && npm install --prefix Client/server && npm install --prefix admin/server",
     "start:client": "npm start --prefix Client/server",
     "start:admin": "npm start --prefix admin/server"

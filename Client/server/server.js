@@ -61,7 +61,8 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/assets', express.static(path.join(__dirname, '../assets')));
 
 // ====== RATE LIMITING ======
-app.use('/api/auth', authRateLimit);
+app.post('/api/auth/login', authRateLimit);
+app.post('/api/auth/register', authRateLimit);
 app.use('/api', apiRateLimit);
 
 const MONGODB_URI = process.env.MONGODB_URI;

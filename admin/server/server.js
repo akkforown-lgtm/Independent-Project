@@ -73,7 +73,8 @@ const upload = multer({
 });
 
 // ====== RATE LIMITING ======
-app.use('/api/admin/auth', authRateLimit);
+app.post('/api/admin/auth/login', authRateLimit);
+app.post('/api/admin/auth/register', authRateLimit);
 app.use('/api/admin', apiRateLimit);
 
 const MONGODB_URI = process.env.MONGODB_URI;

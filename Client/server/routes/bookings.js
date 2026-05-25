@@ -27,9 +27,14 @@ async function countOverlappingRegionBookings(city, checkIn, checkOut) {
   const end = sanitizeDate(checkOut);
   if (!start || !end || end <= start) return 0;
 
+  const now = new Date();
   return Booking.countDocuments({
     city: String(city).trim(),
     status: { $nin: ['cancelled', 'rejected', 'completed'] },
+    $or: [
+      { expiresAt: null },
+      { expiresAt: { $gt: now } }
+    ],
     checkIn: { $lt: end },
     checkOut: { $gt: start }
   });
@@ -187,12 +192,17 @@ router.post('/hold/:id/confirm', protect, async (req, res) => {
     if (!isValidObjectId(req.params.id)) {
       return res.status(400).json({ success: false, error: 'Неверный формат ID' });
     }
-    const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id });
+    const booking = await Booking.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+      status: 'hold',
+      $or: [
+        { expiresAt: null },
+        { expiresAt: { $gt: new Date() } }
+      ]
+    });
     if (!booking) {
       return res.status(404).json({ success: false, error: 'Время бронирования истекло или бронь не найдена', code: 'HOLD_EXPIRED' });
-    }
-    if (booking.status !== 'hold') {
-      return res.status(400).json({ success: false, error: 'Бронирование уже подтверждено или недействительно' });
     }
     
     booking.status = 'active';
@@ -264,9 +274,14 @@ router.get('/room-status', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Требуется roomName' });
     }
 
+    const now = new Date();
     const query = {
       roomName: String(roomName).trim(),
-      status: { $nin: ['cancelled', 'rejected', 'completed'] }
+      status: { $nin: ['cancelled', 'rejected', 'completed'] },
+      $or: [
+        { expiresAt: null },
+        { expiresAt: { $gt: now } }
+      ]
     };
 
     if (city) {

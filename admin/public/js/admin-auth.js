@@ -112,6 +112,16 @@ function getAdminApiBaseUrl() {
 
 const API_URL = getAdminApiBaseUrl();
 
+function parseApiError(error) {
+  if (!error) return 'Ошибка запроса';
+  if (typeof error === 'string') return error;
+  if (typeof error === 'object') {
+    const messages = Object.values(error).flatMap(value => Array.isArray(value) ? value : [value]);
+    return messages.filter(Boolean)[0] || 'Ошибка запроса';
+  }
+  return String(error);
+}
+
 function showAlert(type, message) {
   const lang = getLang();
   document.getElementById('alert-icon').textContent = type === 'error' ? '❌' : type === 'success' ? '✅' : '⚠️';
@@ -144,7 +154,7 @@ async function handleLogin(e) {
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    if (!res.ok) throw new Error(parseApiError(data.error || data.message));
 
     localStorage.setItem('adminToken', data.token);
     localStorage.setItem('adminUser', JSON.stringify(data.user));
@@ -184,7 +194,7 @@ async function handleRegister(e) {
       body: JSON.stringify({ firstName, lastName, email, phone: phoneCode + phone, password, adminCode })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    if (!res.ok) throw new Error(parseApiError(data.error || data.message));
 
     localStorage.setItem('adminToken', data.token);
     localStorage.setItem('adminUser', JSON.stringify(data.user));

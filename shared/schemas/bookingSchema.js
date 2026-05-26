@@ -1,10 +1,12 @@
 module.exports = function(mongoose) {
+  const { allowedCities } = require('../validation');
+
   const bookingSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     roomName: { type: String, required: true },
     roomPrice: { type: Number, required: true },
     roomCategory: { type: String, enum: ['vip', 'classic', 'cheap'], default: 'classic' },
-    city: { type: String, required: true },
+    city: { type: String, required: true, enum: allowedCities },
     checkIn: { type: Date, required: true },
     checkOut: { type: Date, required: true },
     nights: { type: Number, required: true },

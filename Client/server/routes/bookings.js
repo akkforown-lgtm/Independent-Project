@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Booking = mongoose.model('Booking');
 const RegionLimit = mongoose.model('RegionLimit');
 const { protect } = require('../middleware/auth');
-const { validateBookingData } = require('../../../shared/validation');
+const { validateBookingData, normalizeCity } = require('../../../shared/validation');
 
 const router = express.Router();
 
@@ -17,8 +17,9 @@ function datesOverlap(checkInA, checkOutA, checkInB, checkOutB) {
 }
 
 async function getRegionLimit(city) {
-  if (!city) return 3;
-  const region = await RegionLimit.findOne({ city: String(city).trim() });
+  const normalizedCity = normalizeCity(city);
+  if (!normalizedCity) return 3;
+  const region = await RegionLimit.findOne({ city: normalizedCity });
   return region ? region.maxBookings : 3;
 }
 
@@ -29,7 +30,7 @@ async function countOverlappingRegionBookings(city, checkIn, checkOut) {
 
   const now = new Date();
   return Booking.countDocuments({
-    city: String(city).trim(),
+    city: normalizeCity(city),
     status: { $nin: ['cancelled', 'rejected', 'completed'] },
     $or: [
       { expiresAt: null },
@@ -48,7 +49,7 @@ function isValidObjectId(id) {
 const bookingLocks = new Map();
 
 async function withBookingLock(city, fn) {
-  const normalizedCity = String(city).trim().toLowerCase();
+  const normalizedCity = normalizeCity(city).toLowerCase();
   
   if (!bookingLocks.has(normalizedCity)) {
     bookingLocks.set(normalizedCity, Promise.resolve());
@@ -84,7 +85,8 @@ router.post('/', protect, async (req, res) => {
       return res.status(400).json({ success: false, error: validation.errors });
     }
 
-    const { roomName, roomPrice, roomCategory, city, checkIn, checkOut, nights, totalPrice } = req.body;
+    const { roomName, roomPrice, roomCategory, checkIn, checkOut, nights, totalPrice } = req.body;
+    const city = normalizeCity(req.body.city);
 
     const booking = await withBookingLock(city, async () => {
       const overlappingCount = await countOverlappingRegionBookings(city, checkIn, checkOut);
@@ -138,7 +140,8 @@ router.post('/hold', protect, async (req, res) => {
       return res.status(400).json({ success: false, error: validation.errors });
     }
 
-    const { roomName, roomPrice, roomCategory, city, checkIn, checkOut, nights, totalPrice } = req.body;
+    const { roomName, roomPrice, roomCategory, checkIn, checkOut, nights, totalPrice } = req.body;
+    const city = normalizeCity(req.body.city);
 
     const booking = await withBookingLock(city, async () => {
       const overlappingCount = await countOverlappingRegionBookings(city, checkIn, checkOut);
@@ -240,7 +243,8 @@ router.delete('/hold/:id', protect, async (req, res) => {
 
 router.get('/region-status', async (req, res) => {
   try {
-    const { city, checkIn, checkOut } = req.query;
+    const { checkIn, checkOut } = req.query;
+    const city = normalizeCity(req.query.city);
     const start = sanitizeDate(checkIn);
     const end = sanitizeDate(checkOut);
 
@@ -254,7 +258,7 @@ router.get('/region-status', async (req, res) => {
     res.json({
       success: true,
       data: {
-        city: String(city).trim(),
+        city,
         checkIn: start,
         checkOut: end,
         overlappingCount,
@@ -269,7 +273,8 @@ router.get('/region-status', async (req, res) => {
 
 router.get('/room-status', async (req, res) => {
   try {
-    const { roomName, city } = req.query;
+    const { roomName } = req.query;
+    const city = normalizeCity(req.query.city);
     if (!roomName) {
       return res.status(400).json({ success: false, error: 'Требуется roomName' });
     }
@@ -285,7 +290,7 @@ router.get('/room-status', async (req, res) => {
     };
 
     if (city) {
-      query.city = String(city).trim();
+      query.city = city;
     }
 
     const bookings = await Booking.find(query).sort({ checkIn: 1 });
@@ -340,7 +345,12 @@ router.put('/:id/change-request', protect, async (req, res) => {
       return res.status(400).json({ success: false, error: 'WINDOW_EXPIRED', message: 'Время для изменения истекло.' });
     }
 
-    const { newRoomName, newRoomPrice, newRoomCategory, newCity, newCheckIn, newCheckOut, newNights, newTotalPrice } = req.body;
+    const { newRoomName, newRoomPrice, newRoomCategory, newCheckIn, newCheckOut, newNights, newTotalPrice } = req.body;
+    const newCity = req.body.newCity ? normalizeCity(req.body.newCity) : null;
+
+    if (req.body.newCity && !newCity) {
+      return res.status(400).json({ success: false, error: { city: 'Выберите корректный город' } });
+    }
 
     booking.changeRequest = {
       newRoomName: newRoomName || booking.roomName,

@@ -30,6 +30,14 @@ const validatePhone = (phone) => {
   return false;
 };
 
+const allowedCities = ['Tashkent', 'Bukhara', 'Samarkand', 'Khiva', 'Fergana'];
+
+const normalizeCity = (city) => {
+  if (typeof city !== 'string') return null;
+  const trimmed = city.trim();
+  return allowedCities.find(allowed => allowed.toLowerCase() === trimmed.toLowerCase()) || null;
+};
+
 const validatePassword = (password) => {
   if (password.length < 6) {
     return { valid: false, error: 'Пароль должен быть минимум 6 символов' };
@@ -51,8 +59,8 @@ const validateBookingData = (data) => {
     errors.roomPrice = 'Цена номера должна быть положительным числом';
   }
 
-  if (!data.city || typeof data.city !== 'string') {
-    errors.city = 'Город обязателен';
+  if (!normalizeCity(data.city)) {
+    errors.city = 'Выберите корректный город';
   }
 
   if (!data.checkIn || isNaN(new Date(data.checkIn).getTime())) {
@@ -125,6 +133,8 @@ module.exports = {
   validateEmail,
   validatePhone,
   validatePassword,
+  normalizeCity,
+  allowedCities,
   validateBookingData,
   validateRegistrationData,
   validateLoginData

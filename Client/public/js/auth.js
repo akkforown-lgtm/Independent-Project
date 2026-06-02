@@ -19,13 +19,13 @@ async function handleLogin(event) {
   if (!email.value || !password.value) {
     form.classList.add('shake');
     setTimeout(() => form.classList.remove('shake'), 600);
-    showCustomAlert('warning', lang === 'ru' ? 'Пожалуйста, заполните все поля' : 'Please fill in all fields');
+    showCustomAlert('warning', 'auth.fillAllFields');
     return;
   }
   
   const btn = document.getElementById('login-btn');
   const originalText = btn.innerHTML;
-  btn.innerHTML = '<span class="inline-block animate-spin">🔄</span> ' + (lang === 'ru' ? 'Вход...' : 'Signing in...');
+  btn.innerHTML = '<span class="inline-block animate-spin">🔄</span> ' + translations[lang]['auth.signingIn'];
   btn.disabled = true;
   
   try {
@@ -109,13 +109,13 @@ async function handleRegister(event) {
       !fields.phone.value || !fields.password.value) {
     form.classList.add('shake');
     setTimeout(() => form.classList.remove('shake'), 600);
-    showCustomAlert('warning', lang === 'ru' ? 'Пожалуйста, заполните все поля' : 'Please fill in all fields');
+    showCustomAlert('warning', 'auth.fillAllFields');
     return;
   }
   
   if (fields.password.value.length < 6) {
     fields.password.classList.add('input-error', 'shake');
-    errors.password.textContent = lang === 'ru' ? 'Пароль должен быть минимум 6 символов' : 'Password must be at least 6 characters';
+    errors.password.textContent = translations[lang]['auth.passwordTooShort'];
     errors.password.classList.remove('hidden');
     setTimeout(() => fields.password.classList.remove('shake'), 600);
     return;
@@ -140,9 +140,7 @@ async function handleRegister(event) {
 
   if (!validatePhoneClient(fullPhone)) {
     fields.phone.classList.add('input-error', 'shake');
-    errors.phone.textContent = lang === 'ru' 
-      ? 'Некорректный номер телефона (допускается +7 и 11 цифр, либо +998 и 12 цифр)' 
-      : 'Invalid phone number (+7 with 11 digits, or +998 with 12 digits)';
+    errors.phone.textContent = translations[lang]['auth.invalidPhoneFormat'];
     errors.phone.classList.remove('hidden');
     setTimeout(() => fields.phone.classList.remove('shake'), 600);
     return;
@@ -150,7 +148,7 @@ async function handleRegister(event) {
   
   const btn = document.getElementById('register-btn');
   const originalText = btn.innerHTML;
-  btn.innerHTML = '<span class="inline-block animate-spin">🔄</span> ' + (lang === 'ru' ? 'Регистрация...' : 'Registering...');
+  btn.innerHTML = '<span class="inline-block animate-spin">🔄</span> ' + translations[lang]['auth.registering'];
   btn.disabled = true;
   
   try {
@@ -228,6 +226,5 @@ async function handleRegister(event) {
 }
 
 function showCustomAlert(type, message) {
-  document.getElementById('alert-message').textContent = message;
-  showAlertModal(type, 'alert.warning.title');
+  showAlertModal(type, message);
 }

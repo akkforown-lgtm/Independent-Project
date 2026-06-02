@@ -62,6 +62,11 @@ module.exports = function(mongoose) {
   bookingSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
   bookingSchema.pre('save', function(next) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (this.checkIn < today) return next(new Error('Дата заезда не может быть в прошлом'));
+    if (this.checkOut < today) return next(new Error('Дата выезда не может быть в прошлом'));
     if (this.checkOut <= this.checkIn) return next(new Error('Дата выезда должна быть позже даты заезда'));
     next();
   });

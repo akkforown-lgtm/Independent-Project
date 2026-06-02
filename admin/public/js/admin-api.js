@@ -166,9 +166,11 @@ switchLang(getLang());
 document.getElementById('admin-name').textContent = user.firstName || 'Admin';
 
 function showAlert(type, msg) {
+  const lang = getLang();
+  const translatedMessage = tr(msg);
   document.getElementById('alert-icon').textContent = type === 'error' ? '❌' : type === 'success' ? '✅' : '⚠️';
   document.getElementById('alert-title').textContent = tr(type);
-  document.getElementById('alert-message').textContent = msg;
+  document.getElementById('alert-message').textContent = translatedMessage !== msg ? translatedMessage : msg;
   document.getElementById('alert-modal').classList.remove('hidden');
 }
 function closeAlert() { document.getElementById('alert-modal').classList.add('hidden'); }

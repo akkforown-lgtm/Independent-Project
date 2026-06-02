@@ -48,6 +48,13 @@ const validatePassword = (password) => {
   return { valid: true };
 };
 
+const getDateOnly = (value) => {
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return null;
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
+
 const validateBookingData = (data) => {
   const errors = {};
 
@@ -71,9 +78,16 @@ const validateBookingData = (data) => {
     errors.checkOut = 'Дата выезда некорректна';
   }
 
-  const checkInDate = new Date(data.checkIn);
-  const checkOutDate = new Date(data.checkOut);
-  if (checkOutDate <= checkInDate) {
+  const today = getDateOnly(new Date());
+  const checkInDate = getDateOnly(data.checkIn);
+  const checkOutDate = getDateOnly(data.checkOut);
+  if (checkInDate && checkInDate < today) {
+    errors.checkIn = 'Дата заезда не может быть в прошлом';
+  }
+  if (checkOutDate && checkOutDate < today) {
+    errors.checkOut = 'Дата выезда не может быть в прошлом';
+  }
+  if (checkInDate && checkOutDate && checkOutDate <= checkInDate) {
     errors.dates = 'Дата выезда должна быть позже даты заезда';
   }
 

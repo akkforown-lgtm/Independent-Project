@@ -182,12 +182,12 @@ async function addNewCard() {
   const number = document.getElementById('new-card-number')?.value.replace(/\s/g, '');
   const expiry = document.getElementById('new-card-expiry')?.value;
   const cvc = document.getElementById('new-card-cvc')?.value;
-  if (!number || number.length < 16) { showCustomAlert('warning', lang === 'ru' ? 'Введите корректный номер карты (16 цифр)' : 'Enter a valid card number (16 digits)'); return; }
-  if (!expiry || !cvc) { showCustomAlert('warning', lang === 'ru' ? 'Заполните все поля' : 'Fill in all fields'); return; }
+  if (!number || number.length < 16) { showCustomAlert('warning', 'dashboard.enterValidCardNumber'); return; }
+  if (!expiry || !cvc) { showCustomAlert('warning', 'dashboard.fillAllFields'); return; }
   const brand = number.startsWith('4') ? 'Visa' : number.startsWith('5') ? 'Mastercard' : 'Card';
   try {
     await window.api.addCard({ cardNumber: number, expiry, brand });
-    showCustomAlert('success', lang === 'ru' ? '✅ Карта добавлена!' : '✅ Card added!');
+    showCustomAlert('success', 'dashboard.cardAdded');
     loadDashboard();
   } catch (error) {
     showCustomAlert('error', error.message);
@@ -196,7 +196,7 @@ async function addNewCard() {
 async function deleteCard(cardId) {
   try {
     await window.api.deleteCard(cardId);
-    showCustomAlert('success', getCurrentLanguage() === 'ru' ? 'Карта удалена' : 'Card deleted');
+    showCustomAlert('success', 'dashboard.cardDeleted');
     loadDashboard();
   } catch (error) {
     showCustomAlert('error', error.message);

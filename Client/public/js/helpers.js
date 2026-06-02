@@ -32,7 +32,7 @@ function showAlertModal(type, translateKeyOrMessage) {
     if (message) message.textContent = displayMessage;
   } else if (type === 'success') {
     if (icon) icon.textContent = '✅';
-    if (title) title.textContent = t['alert.ok'] || 'Success';
+    if (title) title.textContent = t['alert.success.title'] || 'Success';
     if (message) message.textContent = displayMessage;
   }
   
@@ -100,7 +100,7 @@ function showCustomAlert(type, message) {
   
   if (type === 'success') {
     if (icon) icon.textContent = '✅';
-    if (title) title.textContent = t['alert.ok'] || 'Success';
+    if (title) title.textContent = t['alert.success.title'] || 'Success';
   } else if (type === 'error') {
     if (icon) icon.textContent = '❌';
     if (title) title.textContent = t['alert.error.title'] || 'Error';

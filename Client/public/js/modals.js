@@ -41,6 +41,17 @@ function openBookingModal(name, price, category = 'classic') {
   updateBookingPricePreview();
   updateRegionStatusText();
   closeRoomsModal();
+  refreshBookingDateInputs();
+  const checkinInput = document.getElementById('checkin');
+  const checkoutInput = document.getElementById('checkout');
+  if (checkinInput && !checkinInput.dataset.bookingListenerAttached) {
+    checkinInput.addEventListener('change', () => { refreshBookingDateInputs(); updateBookingPricePreview(); updateRegionStatusText(); });
+    checkinInput.dataset.bookingListenerAttached = '1';
+  }
+  if (checkoutInput && !checkoutInput.dataset.bookingListenerAttached) {
+    checkoutInput.addEventListener('change', () => { updateBookingPricePreview(); updateRegionStatusText(); });
+    checkoutInput.dataset.bookingListenerAttached = '1';
+  }
   const bookingModal = document.getElementById('booking-modal');
   if (bookingModal) bookingModal.classList.remove('hidden');
 }
@@ -108,6 +119,41 @@ async function updateRegionStatusText() {
   }
 }
 
+function getBookingInputMinDate() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today.toISOString().split('T')[0];
+}
+
+function refreshBookingDateInputs() {
+  const checkinInput = document.getElementById('checkin');
+  const checkoutInput = document.getElementById('checkout');
+  const todayStr = getBookingInputMinDate();
+
+  if (checkinInput) {
+    checkinInput.min = todayStr;
+    if (checkinInput.value && checkinInput.value < todayStr) {
+      checkinInput.value = todayStr;
+    }
+  }
+
+  if (checkoutInput) {
+    checkoutInput.min = todayStr;
+    if (checkoutInput.value && checkoutInput.value < todayStr) {
+      checkoutInput.value = todayStr;
+    }
+  }
+
+  if (checkinInput && checkoutInput && checkinInput.value) {
+    const nextDate = new Date(checkinInput.value);
+    nextDate.setDate(nextDate.getDate() + 1);
+    checkoutInput.min = nextDate.toISOString().split('T')[0];
+    if (checkoutInput.value && checkoutInput.value <= checkinInput.value) {
+      checkoutInput.value = checkoutInput.min;
+    }
+  }
+}
+
 function renderBookingRanges(bookings) {
   const lang = getCurrentLanguage();
   const t = translations[lang];
@@ -138,7 +184,22 @@ async function proceedToPayment() {
   const lang = getCurrentLanguage();
 
   if (!checkin || !checkout) { showAlertModal('warning', 'booking.invalidDates'); return; }
-  if (new Date(checkin) >= new Date(checkout)) {
+  const checkinDate = new Date(checkin);
+  const checkoutDate = new Date(checkout);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (isNaN(checkinDate.getTime()) || isNaN(checkoutDate.getTime())) {
+    showAlertModal('warning', 'booking.invalidDates');
+    return;
+  }
+
+  if (checkinDate < today || checkoutDate < today) {
+    showAlertModal('warning', 'booking.pastDates');
+    return;
+  }
+
+  if (checkinDate >= checkoutDate) {
     showAlertModal('warning', 'booking.checkoutAfterCheckin');
     return;
   }

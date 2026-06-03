@@ -28,9 +28,14 @@ app.get('/metrics', async (req, res) => {
 
 // ====== CORS CONFIGURATION ======
 const rawCorsOrigin = process.env.CORS_ORIGIN;
+const defaultOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+// If running on Render, include the Render external URL automatically
+if (process.env.RENDER_EXTERNAL_URL) {
+  defaultOrigins.push(process.env.RENDER_EXTERNAL_URL);
+}
 const corsOrigins = rawCorsOrigin
   ? rawCorsOrigin.split(',').map(origin => origin.trim()).filter(Boolean)
-  : ['http://localhost:3000', 'http://localhost:3001'];
+  : defaultOrigins;
 
 const corsOptions = {
   origin: (origin, callback) => {

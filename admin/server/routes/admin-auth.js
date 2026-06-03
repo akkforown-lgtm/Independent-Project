@@ -18,12 +18,14 @@ router.post('/register', async (req, res) => {
 
     // Validate admin code
     if (!adminCode || adminCode !== process.env.ADMIN_SECRET_CODE) {
+      console.warn('Admin register attempt with invalid adminCode', { email: email && email.toLowerCase(), phone });
       return res.status(403).json({ success: false, error: { adminCode: 'Неверный код администратора' } });
     }
 
     // Validate input
     const validation = validateRegistrationData(req.body);
     if (!validation.valid) {
+      console.warn('Admin register validation failed', { errors: validation.errors, email: email && email.toLowerCase(), phone });
       return res.status(400).json({ success: false, error: validation.errors });
     }
 
@@ -64,6 +66,7 @@ router.post('/login', async (req, res) => {
     // Validate input
     const validation = validateLoginData(req.body);
     if (!validation.valid) {
+      console.warn('Admin login validation failed', { errors: validation.errors, email: email && email.toLowerCase() });
       return res.status(400).json({ success: false, error: validation.errors });
     }
 

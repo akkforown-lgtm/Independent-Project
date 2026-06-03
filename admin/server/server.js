@@ -37,21 +37,12 @@ const corsOrigins = rawCorsOrigin
   ? rawCorsOrigin.split(',').map(origin => origin.trim()).filter(Boolean)
   : defaultOrigins;
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (corsOrigins.includes(origin)) return callback(null, true);
-    const msg = `CORS origin denied: ${origin}`;
-    console.warn(msg);
-    return callback(new Error(msg), false);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
-};
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+const createCors = require('../../shared/cors');
+const { corsMiddleware } = createCors();
+
+app.use(corsMiddleware);
+app.options('*', corsMiddleware);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '../public')));

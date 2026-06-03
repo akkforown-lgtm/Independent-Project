@@ -1,5 +1,9 @@
 const cors = require('cors');
 
+function normalizeOrigin(origin) {
+  return String(origin || '').replace(/^https?:\/\//, '').replace(/\/$/, '').toLowerCase();
+}
+
 function createCors() {
   const rawCorsOrigin = process.env.CORS_ORIGIN;
   const defaultOrigins = ['http://localhost:3000', 'http://localhost:3001'];
@@ -24,10 +28,23 @@ function createCors() {
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
   };
 
+  const baseCorsMiddleware = cors(corsOptions);
+
   return {
     corsOrigins,
     corsOptions,
-    corsMiddleware: cors(corsOptions)
+    corsMiddleware: (req, res, next) => {
+      const origin = req.get('origin');
+      const host = req.get('host');
+      const normalizedOrigin = normalizeOrigin(origin);
+      const normalizedHost = normalizeOrigin(host);
+
+      if (origin && host && normalizedOrigin === normalizedHost && !corsOrigins.includes(origin)) {
+        corsOrigins.push(origin);
+      }
+
+      return baseCorsMiddleware(req, res, next);
+    }
   };
 }
 

@@ -65,9 +65,21 @@ module.exports = function(mongoose) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (this.checkIn < today) return next(new Error('Дата заезда не может быть в прошлом'));
-    if (this.checkOut < today) return next(new Error('Дата выезда не может быть в прошлом'));
-    if (this.checkOut <= this.checkIn) return next(new Error('Дата выезда должна быть позже даты заезда'));
+    const checkInChanged = this.isNew || this.isModified('checkIn');
+    const checkOutChanged = this.isNew || this.isModified('checkOut');
+
+    if (checkInChanged && this.checkIn < today) {
+      return next(new Error('Дата заезда не может быть в прошлом'));
+    }
+
+    if (checkOutChanged && this.checkOut < today) {
+      return next(new Error('Дата выезда не может быть в прошлом'));
+    }
+
+    if ((checkInChanged || checkOutChanged) && this.checkOut <= this.checkIn) {
+      return next(new Error('Дата выезда должна быть позже даты заезда'));
+    }
+
     next();
   });
 

@@ -107,7 +107,7 @@ async function start() {
       ]);
       console.log('✅ Default region booking limits seeded');
     }
-    
+
     // 🔥 Регистрируем Checkout ДО подключения маршрутов
     const checkoutSchema = new mongoose.Schema({
       bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking', required: true, unique: true },
@@ -128,7 +128,85 @@ async function start() {
       closedAt: { type: Date, default: Date.now }
     }, { timestamps: true });
     mongoose.model('Checkout', checkoutSchema);
-    
+
+    const autoCloseOverdueBookings = async () => {
+      try {
+        const BookingModel = mongoose.model('Booking');
+        const CheckoutModel = mongoose.model('Checkout');
+        const now = new Date();
+
+        const overdueBookings = await BookingModel.find({
+          status: 'active',
+          checkOut: { $lt: now }
+        });
+
+        for (const booking of overdueBookings) {
+          const roomTotal = booking.roomPrice * booking.nights;
+          const services = Array.isArray(booking.additionalServices) ? booking.additionalServices : [];
+          const servicesTotal = services.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.quantity) || 1)), 0);
+          const discountAmount = 0;
+          const grandTotal = roomTotal + servicesTotal - discountAmount;
+
+          let checkout = await CheckoutModel.findOne({ bookingId: booking._id });
+
+          if (!checkout) {
+            checkout = new CheckoutModel({
+              bookingId: booking._id,
+              services,
+              servicesTotal,
+              roomTotal,
+              discount: discountAmount,
+              grandTotal,
+              paymentMethod: 'card',
+              status: 'completed',
+              closedBy: 'System',
+              closedAt: now
+            });
+          } else {
+            checkout.services = services;
+            checkout.servicesTotal = servicesTotal;
+            checkout.roomTotal = roomTotal;
+            checkout.discount = discountAmount;
+            checkout.grandTotal = grandTotal;
+            checkout.paymentMethod = 'card';
+            checkout.notes = checkout.notes || 'Auto-closed by system';
+            checkout.closedBy = 'System';
+            checkout.closedAt = now;
+            checkout.status = 'completed';
+          }
+
+          await checkout.save();
+
+          booking.status = 'completed';
+          booking.checkout = {
+            id: checkout._id,
+            closedBy: 'System',
+            closedAt: now,
+            roomTotal,
+            servicesTotal,
+            discount: discountAmount,
+            grandTotal,
+            paymentMethod: 'card',
+            services
+          };
+          booking.notifications.push({
+            message: `✅ Заказ автоматически закрыт. Итоговая сумма: $${grandTotal.toFixed(2)}`,
+            type: 'success',
+            createdAt: now
+          });
+
+          await booking.save();
+          console.log(`Авто закрыл заказ ${booking._id}`);
+        }
+      } catch (error) {
+        console.error('Auto-close overdue bookings error:', error);
+      }
+    };
+
+    // Run immediately and then every 5 minutes
+    autoCloseOverdueBookings();
+    setInterval(autoCloseOverdueBookings, 5 * 60 * 1000);
+
     console.log('✅ Модели зарегистрированы');
 
     app.post('/api/admin/upload', upload.single('image'), (req, res) => {

@@ -168,7 +168,7 @@ router.post('/:bookingId', protect, async (req, res) => {
     });
   } catch (error) {
     console.error('Create checkout error:', error);
-    res.status(500).json({ success: false, error: 'Ошибка закрытия заказа' });
+    res.status(500).json({ success: false, error: error.message || 'Ошибка закрытия заказа' });
   }
 });
 

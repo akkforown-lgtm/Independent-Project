@@ -107,7 +107,7 @@ function getAdminApiBaseUrl() {
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:3001/api/admin';
   }
-  return `${window.location.protocol}//${window.location.host}/api/admin`;
+  return `${window.location.origin}/api/admin`;
 }
 
 const API_URL = getAdminApiBaseUrl();

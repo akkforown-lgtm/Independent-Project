@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
 const path = require('path');
 const mongoose = require('mongoose');
 const client = require('prom-client');
@@ -27,17 +26,6 @@ app.get('/metrics', async (req, res) => {
 });
 
 // ====== CORS CONFIGURATION ======
-const rawCorsOrigin = process.env.CORS_ORIGIN;
-const defaultOrigins = ['http://localhost:3000', 'http://localhost:3001'];
-// If running on Render, include the Render external URL automatically
-if (process.env.RENDER_EXTERNAL_URL) {
-  defaultOrigins.push(process.env.RENDER_EXTERNAL_URL);
-}
-const corsOrigins = rawCorsOrigin
-  ? rawCorsOrigin.split(',').map(origin => origin.trim()).filter(Boolean)
-  : defaultOrigins;
-
-
 const createCors = require('../../shared/cors');
 const { corsMiddleware } = createCors();
 

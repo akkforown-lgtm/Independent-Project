@@ -2,13 +2,10 @@
  * Get the API base URL dynamically
  */
 function getAdminApiBaseUrl() {
-  // In development, use localhost
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:3001/api/admin';
   }
-
-  // In production, use the same host as the admin panel
-  return `${window.location.protocol}//${window.location.host}/api/admin`;
+  return `${window.location.origin}/api/admin`;
 }
 
 const API_URL = getAdminApiBaseUrl();

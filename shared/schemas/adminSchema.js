@@ -8,7 +8,7 @@ module.exports = function(mongoose) {
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true, minlength: 6 },
     role: { type: String, default: 'admin' }
-  }, { timestamps: true }, { collection: 'admins' }); // Явно коллекция admins
+  }, { timestamps: true, collection: 'admins' }); // Явно коллекция admins
 
   adminSchema.pre('save', async function(next) {
     if (!this.isModified('password')) return next();

@@ -122,6 +122,18 @@ function parseApiError(error) {
   return String(error);
 }
 
+function normalizePhoneNumber(phoneCode, phone) {
+  const raw = `${phoneCode || ''}${phone || ''}`;
+  const digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('998') && digits.length === 12) {
+    return `+${digits}`;
+  }
+  if (digits.startsWith('7') && digits.length === 11) {
+    return `+${digits}`;
+  }
+  return raw.trim();
+}
+
 function showAlert(type, message) {
   const lang = getLang();
   document.getElementById('alert-icon').textContent = type === 'error' ? '❌' : type === 'success' ? '✅' : '⚠️';
@@ -185,13 +197,15 @@ async function handleRegister(e) {
     return;
   }
 
+  const normalizedPhone = normalizePhoneNumber(phoneCode, phone);
+
   btn.innerHTML = '🔄...';
   btn.disabled = true;
 
   try {
     const res = await fetch(`${API_URL}/auth/register`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ firstName, lastName, email, phone: phoneCode + phone, password, adminCode })
+      body: JSON.stringify({ firstName, lastName, email, phone: normalizedPhone, password, adminCode })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(parseApiError(data.error || data.message));
@@ -201,6 +215,7 @@ async function handleRegister(e) {
     window.location.href = '/dashboard.html';
   } catch (error) {
     showAlert('error', error.message);
+  } finally {
     btn.textContent = translations[lang]['auth.signUp'];
     btn.disabled = false;
   }

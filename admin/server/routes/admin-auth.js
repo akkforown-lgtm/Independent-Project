@@ -7,6 +7,17 @@ const { validateRegistrationData, validateLoginData } = require('../../../shared
 const router = express.Router();
 const Admin = () => mongoose.model('Admin'); // 🔥 Отдельная модель Admin
 
+const normalizePhone = (phone) => {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (digits.startsWith('998') && digits.length === 12) {
+    return `+${digits}`;
+  }
+  if (digits.startsWith('7') && digits.length === 11) {
+    return `+${digits}`;
+  }
+  return String(phone || '').trim();
+};
+
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
@@ -29,18 +40,20 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, error: validation.errors });
     }
 
+    const normalizedPhone = normalizePhone(phone);
+
     const existingAdmin = await Admin().findOne({ email: email.toLowerCase() });
     if (existingAdmin) {
       return res.status(400).json({ success: false, error: { email: 'Администратор с таким email уже существует' } });
     }
 
-    const existingPhone = await Admin().findOne({ phone });
+    const existingPhone = await Admin().findOne({ phone: normalizedPhone });
     if (existingPhone) {
       return res.status(400).json({ success: false, error: { phone: 'Администратор с таким телефоном уже существует' } });
     }
 
     const admin = await Admin().create({
-      firstName, lastName, email: email.toLowerCase(), phone, password
+      firstName, lastName, email: email.toLowerCase(), phone: normalizedPhone, password
     });
 
     const token = generateToken(admin._id);

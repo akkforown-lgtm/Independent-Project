@@ -23,7 +23,7 @@ async function loadRooms() {
           </div>
           <div class="mt-auto">
             <p class="text-amber-400 text-xl font-bold">$${room.price} <span class="text-sm text-gray-400">${tr('perNight')}</span></p>
-            <p class="text-sm text-gray-400 mt-1">${room.size || ''} | Лимит: ${room.quantity || 1}</p>
+            <p class="text-sm text-gray-400 mt-1">${room.size || ''} | ${tr('limit')}: ${room.quantity || 1}</p>
             <div class="flex flex-col sm:flex-row gap-2 mt-4">
               <button onclick="openRoomForm('${room._id}')" class="w-full sm:flex-1 py-2 border border-amber-400/50 text-amber-400 rounded-xl hover:bg-amber-400/10 transition text-sm">✏️ ${tr('edit')}</button>
               <button onclick="deleteRoom('${room._id}')" class="w-full sm:flex-1 py-2 border border-red-400/30 text-red-400 rounded-xl hover:bg-red-400/10 transition text-sm">🗑️ ${tr('delete')}</button>

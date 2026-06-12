@@ -167,19 +167,29 @@ function openCheckout(bookingId, roomTotal) {
             <h4 class="text-lg font-semibold">📦 ${tr('services')}</h4>
             <button onclick="addServiceRow()" class="px-4 py-2 bg-amber-500/20 text-amber-400 rounded-xl text-sm hover:bg-amber-500/30 transition">+ ${tr('addService')}</button>
           </div>
+          
+          <div class="flex gap-2 text-xs text-gray-400 mb-2 px-3">
+             <div class="w-24">${tr('categoryLabel')}</div>
+             <div class="flex-1">${tr('name')}</div>
+             <div class="w-24 text-right">${tr('price')}</div>
+             <div class="w-3"></div>
+             <div class="w-14 text-center">${tr('quantity')}</div>
+             <div class="w-4"></div>
+          </div>
+          
           <div id="services-list" class="space-y-3">
             ${(checkout.services || []).map((s, i) => `
               <div class="flex gap-2 items-center bg-zinc-800 rounded-xl p-3 service-row">
-                <select class="service-cat w-24 px-2 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm">
+                <select class="service-cat w-24 px-2 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm" title="${tr('categoryLabel')}">
                   ${['restaurant','bar','spa','transfer','laundry','excursion','other'].map(cat => `
                     <option value="${cat}" ${s.category === cat ? 'selected' : ''}>${cat === 'restaurant' ? '🍽️' : cat === 'bar' ? '🍸' : cat === 'spa' ? '💆' : cat === 'transfer' ? '🚗' : cat === 'laundry' ? '🧺' : cat === 'excursion' ? '🏞️' : '📦'} ${tr(cat)}</option>
                   `).join('')}
                 </select>
-                <input class="service-name flex-1 px-3 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm" placeholder="${tr('name')}" value="${s.name || ''}">
-                <input class="service-price w-24 px-3 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm text-right" type="number" placeholder="$" value="${s.price || ''}" onchange="updateCheckoutTotal()">
-                <span class="text-xs text-gray-400">×</span>
-                <input class="service-qty w-14 px-2 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm text-center" type="number" value="${s.quantity || 1}" min="1" onchange="updateCheckoutTotal()">
-                <button onclick="this.parentElement.remove(); updateCheckoutTotal()" class="text-red-400 hover:text-red-300 text-lg">×</button>
+                <input class="service-name flex-1 px-3 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm" placeholder="${tr('name')}" value="${s.name || ''}" title="${tr('name')}">
+                <input class="service-price w-24 px-3 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm text-right" type="number" placeholder="${tr('price')}" value="${s.price || ''}" onchange="updateCheckoutTotal()" title="${tr('price')}">
+                <span class="text-xs text-gray-400 w-3 text-center">×</span>
+                <input class="service-qty w-14 px-2 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm text-center" type="number" placeholder="${tr('quantity')}" value="${s.quantity || 1}" min="1" onchange="updateCheckoutTotal()" title="${tr('quantity')}">
+                <button onclick="this.parentElement.remove(); updateCheckoutTotal()" class="text-red-400 hover:text-red-300 text-lg w-4">×</button>
               </div>
             `).join('')}
           </div>
@@ -204,7 +214,7 @@ function addServiceRow() {
   const row = document.createElement('div');
   row.className = 'flex gap-2 items-center bg-zinc-800 rounded-xl p-3 service-row animate-fade-in-up';
   row.innerHTML = `
-    <select class="service-cat w-24 px-2 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm">
+    <select class="service-cat w-24 px-2 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm" title="${tr('categoryLabel')}">
       <option value="restaurant" selected>🍽️ ${tr('restaurant')}</option>
       <option value="bar">🍸 ${tr('bar')}</option>
       <option value="spa">💆 ${tr('spa')}</option>
@@ -213,11 +223,11 @@ function addServiceRow() {
       <option value="excursion">🏞️ ${tr('excursion')}</option>
       <option value="other">📦 ${tr('other')}</option>
     </select>
-    <input class="service-name flex-1 px-3 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm" placeholder="${tr('name')}">
-    <input class="service-price w-24 px-3 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm text-right" type="number" placeholder="$" value="0" onchange="updateCheckoutTotal()">
-    <span class="text-xs text-gray-400">×</span>
-    <input class="service-qty w-14 px-2 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm text-center" type="number" value="1" min="1" onchange="updateCheckoutTotal()">
-    <button onclick="this.parentElement.remove(); updateCheckoutTotal()" class="text-red-400 hover:text-red-300 text-lg">×</button>
+    <input class="service-name flex-1 px-3 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm" placeholder="${tr('name')}" title="${tr('name')}">
+    <input class="service-price w-24 px-3 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm text-right" type="number" placeholder="${tr('price')}" value="0" onchange="updateCheckoutTotal()" title="${tr('price')}">
+    <span class="text-xs text-gray-400 w-3 text-center">×</span>
+    <input class="service-qty w-14 px-2 py-2 bg-zinc-700 border border-white/10 rounded-lg text-sm text-center" type="number" value="1" min="1" onchange="updateCheckoutTotal()" title="${tr('quantity')}">
+    <button onclick="this.parentElement.remove(); updateCheckoutTotal()" class="text-red-400 hover:text-red-300 text-lg w-4">×</button>
   `;
   list.appendChild(row);
 }

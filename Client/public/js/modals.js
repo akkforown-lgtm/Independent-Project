@@ -88,33 +88,28 @@ async function updateRegionStatusText() {
   const regionText = document.getElementById('region-status-text');
   if (!regionText) return;
 
-  if (!city || !checkin || !checkout) {
-    regionText.textContent = translations[getCurrentLanguage()]['booking.selectRegionDates'] || 'Выберите город и даты, чтобы увидеть занятость региона.';
+  if (!city || !checkin || !checkout || !currentRoom.name) {
+    regionText.textContent = translations[getCurrentLanguage()]['booking.selectRegionDates'] || 'Выберите город и даты, чтобы увидеть доступность номера.';
     window.currentRegionStatus = null;
     return;
   }
 
   try {
-    const response = await window.api.getRegionStatus(city, checkin, checkout);
+    const response = await window.api.getRegionStatus(city, checkin, checkout, currentRoom.name);
     const status = response.data || response;
     window.currentRegionStatus = status;
     regionText.classList.remove('text-red-400', 'text-amber-200', 'text-gray-400');
     if (status.overlappingCount >= status.regionLimit) {
       regionText.classList.add('text-red-400');
-      regionText.textContent = translations[getCurrentLanguage()]['rooms.regionLimitReached']
-        .replace('{city}', status.city)
-        .replace('{limit}', status.regionLimit);
+      regionText.textContent = `Достигнут лимит номеров типа "${currentRoom.name}" на выбранные даты (${status.regionLimit}). Выберите другие даты или номер.`;
     } else {
       regionText.classList.add('text-amber-200');
-      regionText.textContent = translations[getCurrentLanguage()]['rooms.regionOccupied']
-        .replace('{city}', status.city)
-        .replace('{count}', status.overlappingCount)
-        .replace('{limit}', status.regionLimit);
+      regionText.textContent = `Доступно номеров: ${status.regionLimit - status.overlappingCount} из ${status.regionLimit}`;
     }
   } catch (error) {
     regionText.classList.remove('text-red-400', 'text-amber-200', 'text-gray-400');
     regionText.classList.add('text-red-400');
-    regionText.textContent = translations[getCurrentLanguage()]['rooms.regionStatusError'];
+    regionText.textContent = translations[getCurrentLanguage()]['rooms.regionStatusError'] || 'Ошибка проверки статуса номера';
     window.currentRegionStatus = null;
   }
 }

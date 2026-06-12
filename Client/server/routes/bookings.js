@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const Booking = mongoose.model('Booking');
-const RegionLimit = mongoose.model('RegionLimit');
+const Room = mongoose.model('Room');
 const { protect } = require('../middleware/auth');
 const { validateBookingData, normalizeCity } = require('../../../shared/validation');
 
@@ -16,20 +16,14 @@ function datesOverlap(checkInA, checkOutA, checkInB, checkOutB) {
   return new Date(checkInA) < new Date(checkOutB) && new Date(checkOutA) > new Date(checkInB);
 }
 
-async function getRegionLimit(city) {
-  const normalizedCity = normalizeCity(city);
-  if (!normalizedCity) return 3;
-  const region = await RegionLimit.findOne({ city: normalizedCity });
-  return region ? region.maxBookings : 3;
-}
-
-async function countOverlappingRegionBookings(city, checkIn, checkOut) {
+async function countOverlappingRoomBookings(roomName, city, checkIn, checkOut) {
   const start = sanitizeDate(checkIn);
   const end = sanitizeDate(checkOut);
   if (!start || !end || end <= start) return 0;
 
   const now = new Date();
   return Booking.countDocuments({
+    roomName: String(roomName).trim(),
     city: normalizeCity(city),
     status: { $nin: ['cancelled', 'rejected', 'completed'] },
     $or: [
@@ -89,11 +83,12 @@ router.post('/', protect, async (req, res) => {
     const city = normalizeCity(req.body.city);
 
     const booking = await withBookingLock(city, async () => {
-      const overlappingCount = await countOverlappingRegionBookings(city, checkIn, checkOut);
-      const regionLimit = await getRegionLimit(city);
-
-      if (overlappingCount >= regionLimit) {
-        throw new Error('REGION_LIMIT');
+      const room = await Room.findOne({ name: roomName });
+      const roomLimit = room ? (room.quantity || 1) : 1;
+      
+      const overlappingRoomCount = await countOverlappingRoomBookings(roomName, city, checkIn, checkOut);
+      if (overlappingRoomCount >= roomLimit) {
+        throw new Error('ROOM_LIMIT');
       }
 
       return await Booking.create({
@@ -112,13 +107,11 @@ router.post('/', protect, async (req, res) => {
 
     res.status(201).json({ success: true, data: booking });
   } catch (error) {
-    if (error.message === 'REGION_LIMIT') {
-      const { city } = req.body;
-      const regionLimit = await getRegionLimit(city);
+    if (error.message === 'ROOM_LIMIT') {
       return res.status(400).json({
         success: false,
-        error: `Регион ${city} уже содержит ${regionLimit} активных бронирований на выбранные даты`,
-        code: 'REGION_LIMIT'
+        error: `Все доступные номера "${req.body.roomName}" заняты на выбранные даты. Пожалуйста, выберите другие даты или номер.`,
+        code: 'ROOM_LIMIT'
       });
     }
     console.error('Create booking error:', error.message);
@@ -144,11 +137,12 @@ router.post('/hold', protect, async (req, res) => {
     const city = normalizeCity(req.body.city);
 
     const booking = await withBookingLock(city, async () => {
-      const overlappingCount = await countOverlappingRegionBookings(city, checkIn, checkOut);
-      const regionLimit = await getRegionLimit(city);
-
-      if (overlappingCount >= regionLimit) {
-        throw new Error('REGION_LIMIT');
+      const room = await Room.findOne({ name: roomName });
+      const roomLimit = room ? (room.quantity || 1) : 1;
+      
+      const overlappingRoomCount = await countOverlappingRoomBookings(roomName, city, checkIn, checkOut);
+      if (overlappingRoomCount >= roomLimit) {
+        throw new Error('ROOM_LIMIT');
       }
 
       return await Booking.create({
@@ -169,13 +163,11 @@ router.post('/hold', protect, async (req, res) => {
 
     res.status(201).json({ success: true, data: booking });
   } catch (error) {
-    if (error.message === 'REGION_LIMIT') {
-      const { city } = req.body;
-      const regionLimit = await getRegionLimit(city);
+    if (error.message === 'ROOM_LIMIT') {
       return res.status(400).json({
         success: false,
-        error: `Регион ${city} уже содержит ${regionLimit} активных бронирований на выбранные даты`,
-        code: 'REGION_LIMIT'
+        error: `Все доступные номера "${req.body.roomName}" заняты на выбранные даты. Пожалуйста, выберите другие даты или номер.`,
+        code: 'ROOM_LIMIT'
       });
     }
     console.error('Hold booking error:', error.message);
@@ -243,31 +235,34 @@ router.delete('/hold/:id', protect, async (req, res) => {
 
 router.get('/region-status', async (req, res) => {
   try {
-    const { checkIn, checkOut } = req.query;
+    const { checkIn, checkOut, roomName } = req.query;
     const city = normalizeCity(req.query.city);
     const start = sanitizeDate(checkIn);
     const end = sanitizeDate(checkOut);
 
-    if (!city || !start || !end || end <= start) {
-      return res.status(400).json({ success: false, error: 'Неверные параметры региона или дат' });
+    if (!city || !start || !end || end <= start || !roomName) {
+      return res.status(400).json({ success: false, error: 'Неверные параметры' });
     }
 
-    const overlappingCount = await countOverlappingRegionBookings(city, start, end);
-    const regionLimit = await getRegionLimit(city);
+    const room = await Room.findOne({ name: roomName });
+    const roomLimit = room ? (room.quantity || 1) : 1;
+
+    const overlappingCount = await countOverlappingRoomBookings(roomName, city, start, end);
 
     res.json({
       success: true,
       data: {
         city,
+        roomName,
         checkIn: start,
         checkOut: end,
         overlappingCount,
-        regionLimit
+        regionLimit: roomLimit // Keeping regionLimit key for backward compatibility with frontend
       }
     });
   } catch (error) {
-    console.error('Region status error:', error);
-    res.status(500).json({ success: false, error: 'Ошибка получения статуса региона' });
+    console.error('Room status error:', error);
+    res.status(500).json({ success: false, error: 'Ошибка получения статуса номера' });
   }
 });
 

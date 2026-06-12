@@ -10,6 +10,7 @@ module.exports = function(mongoose) {
     imageUrl: { type: String, default: null },
     image: { type: String, default: null },
     isAvailable: { type: Boolean, default: true },
+    quantity: { type: Number, default: 1 },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' }
   }, { timestamps: true });

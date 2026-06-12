@@ -163,8 +163,8 @@ class ApiClient {
     return this.delete(`/bookings/hold/${bookingId}`);
   }
 
-  async getRegionStatus(city, checkIn, checkOut) {
-    const params = new URLSearchParams({ city, checkIn, checkOut });
+  async getRegionStatus(city, checkIn, checkOut, roomName) {
+    const params = new URLSearchParams({ city, checkIn, checkOut, roomName });
     return this.get(`/bookings/region-status?${params.toString()}`);
   }
 
